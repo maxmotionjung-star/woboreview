@@ -38,9 +38,13 @@
         content.innerHTML = `<div class="muted">등록된 상품이 없습니다.</div>`;
         return;
       }
-      content.innerHTML = products.map((p) => `
+      content.innerHTML = products.map((p, i) => `
         <div class="product-list-item">
-          <div>
+          <div class="reorder-buttons">
+            <button class="secondary" data-move="up" data-id="${p.id}" ${i === 0 ? "disabled" : ""}>▲</button>
+            <button class="secondary" data-move="down" data-id="${p.id}" ${i === products.length - 1 ? "disabled" : ""}>▼</button>
+          </div>
+          <div style="flex:1">
             <strong>${p.name ?? "상품 " + p.goods_no}</strong>
             <div class="muted">${p.url}</div>
           </div>
@@ -51,6 +55,16 @@
         btn.addEventListener("click", async () => {
           if (!confirm("이 상품을 삭제하면 관련 변동이력도 함께 삭제됩니다. 계속할까요?")) return;
           await api(`/api/products/${btn.dataset.delete}`, { method: "DELETE" });
+          await loadProducts();
+        });
+      });
+
+      content.querySelectorAll("[data-move]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          await api(`/api/products/${btn.dataset.id}/move`, {
+            method: "PATCH",
+            body: JSON.stringify({ direction: btn.dataset.move }),
+          });
           await loadProducts();
         });
       });

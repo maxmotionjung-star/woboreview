@@ -252,13 +252,30 @@ th { background: var(--bg); }
 
 .product-list-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 8px;
   background: var(--card-bg);
+}
+
+.reorder-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reorder-buttons button {
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.reorder-buttons button:disabled {
+  opacity: 0.3;
+  cursor: default;
 }
 
 .add-product-form {

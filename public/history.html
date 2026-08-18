@@ -49,12 +49,13 @@
           <td>${rankSummary(c)}</td>
           <td>${c.nickname ?? "익명"}</td>
           <td>${gradeStars(c.grade)}</td>
+          <td>${likeChangeText(c)}</td>
         </tr>`).join("");
 
       content.innerHTML = `
         <table>
           <thead>
-            <tr><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>별점</th></tr>
+            <tr><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>별점</th><th>좋아요</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>`;

@@ -39,3 +39,19 @@ function formatDate(iso) {
   const d = new Date(iso);
   return d.toLocaleString("ko-KR", { hour12: false });
 }
+
+function formatDateOnly(iso) {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  return d.toLocaleDateString("ko-KR");
+}
+
+function likeChangeText(change) {
+  const at = change.like_count_at_event;
+  const now = change.like_count_now;
+  if (at == null) return "-";
+  if (now == null || now === at) return `👍 ${at}`;
+  const delta = now - at;
+  const sign = delta > 0 ? "+" : "";
+  return `👍 ${now} (${sign}${delta})`;
+}

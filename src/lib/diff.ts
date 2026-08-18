@@ -8,6 +8,7 @@ export interface RankChangeEvent {
   nickname: string;
   grade: string | null;
   imageUrl: string | null;
+  likeCount: number;
 }
 
 /**
@@ -30,6 +31,7 @@ export function diffTop10(previous: TopReview[], current: TopReview[]): RankChan
         nickname: review.nickname,
         grade: review.grade,
         imageUrl: review.imageUrl,
+        likeCount: review.likeCount,
       });
     }
   }
@@ -44,6 +46,7 @@ export function diffTop10(previous: TopReview[], current: TopReview[]): RankChan
         nickname: review.nickname,
         grade: review.grade,
         imageUrl: review.imageUrl,
+        likeCount: review.likeCount,
       });
     }
   }

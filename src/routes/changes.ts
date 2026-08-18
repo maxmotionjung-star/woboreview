@@ -13,9 +13,15 @@ changesRouter.get(
     const { rows } = await pool.query(
       `SELECT rc.id, rc.product_id, p.name AS product_name, p.goods_no,
               rc.review_no, rc.change_type, rc.old_rank, rc.new_rank,
-              rc.nickname, rc.grade, rc.detected_at
+              rc.nickname, rc.grade, rc.like_count AS like_count_at_event,
+              rs.like_count AS like_count_now,
+              rc.detected_at
        FROM rank_changes rc
        JOIN products p ON p.id = rc.product_id
+       LEFT JOIN review_snapshots rs
+         ON rs.product_id = rc.product_id
+        AND rs.review_no = rc.review_no
+        AND rs.captured_at = (SELECT MAX(captured_at) FROM review_snapshots WHERE product_id = rc.product_id)
        WHERE rc.detected_at >= now() - ($1 || ' days')::interval
        ORDER BY rc.detected_at DESC
        LIMIT 500`,

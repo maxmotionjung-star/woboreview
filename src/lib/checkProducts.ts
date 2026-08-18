@@ -34,8 +34,9 @@ async function getLatestSnapshot(productId: number): Promise<TopReview[]> {
     content: string | null;
     image_url: string | null;
     like_count: number | null;
+    review_posted_at: Date | null;
   }>(
-    `SELECT review_no, rank, nickname, grade, content, image_url, like_count
+    `SELECT review_no, rank, nickname, grade, content, image_url, like_count, review_posted_at
      FROM review_snapshots
      WHERE product_id = $1
        AND captured_at = (SELECT MAX(captured_at) FROM review_snapshots WHERE product_id = $1)
@@ -52,6 +53,7 @@ async function getLatestSnapshot(productId: number): Promise<TopReview[]> {
     imageUrl: r.image_url,
     likeCount: r.like_count ?? 0,
     reviewUrl: `https://www.musinsa.com/review/${r.review_no}`,
+    postedAt: r.review_posted_at ? r.review_posted_at.toISOString() : null,
   }));
 }
 
@@ -60,7 +62,7 @@ async function saveSnapshot(productId: number, reviews: TopReview[], capturedAt:
 
   const values: unknown[] = [];
   const placeholders = reviews.map((r, i) => {
-    const base = i * 9;
+    const base = i * 10;
     values.push(
       productId,
       r.reviewNo,
@@ -70,14 +72,15 @@ async function saveSnapshot(productId: number, reviews: TopReview[], capturedAt:
       r.content,
       r.imageUrl,
       r.likeCount,
+      r.postedAt,
       capturedAt
     );
-    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
+    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10})`;
   });
 
   await pool.query(
     `INSERT INTO review_snapshots
-       (product_id, review_no, rank, nickname, grade, content, image_url, like_count, captured_at)
+       (product_id, review_no, rank, nickname, grade, content, image_url, like_count, review_posted_at, captured_at)
      VALUES ${placeholders.join(", ")}`,
     values
   );
@@ -98,7 +101,7 @@ async function saveRankChanges(
 
   const values: unknown[] = [];
   const placeholders = events.map((e, i) => {
-    const base = i * 8;
+    const base = i * 9;
     values.push(
       productId,
       e.reviewNo,
@@ -107,14 +110,15 @@ async function saveRankChanges(
       e.newRank,
       e.nickname,
       e.grade,
+      e.likeCount,
       detectedAt
     );
-    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
+    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
   });
 
   await pool.query(
     `INSERT INTO rank_changes
-       (product_id, review_no, change_type, old_rank, new_rank, nickname, grade, detected_at)
+       (product_id, review_no, change_type, old_rank, new_rank, nickname, grade, like_count, detected_at)
      VALUES ${placeholders.join(", ")}`,
     values
   );
