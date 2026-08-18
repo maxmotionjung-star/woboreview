@@ -51,7 +51,7 @@
           <div class="body">
             <div class="rank">${r.rank}위</div>
             <div>${r.nickname ?? "익명"}</div>
-            <div>${gradeStars(r.grade)} · <a href="${r.review_url}" target="_blank" rel="noopener" title="무신사에서 도움돼요 누르기">👍 ${r.like_count ?? 0}</a></div>
+            <div>${gradeStars(r.grade)} · 👍 ${r.like_count ?? 0}</div>
             <div class="muted">등록일 ${formatDateOnly(r.review_posted_at)}</div>
             <div class="review-text">${(r.content ?? "").trim() || "(작성된 텍스트 없음)"}</div>
           </div>
