@@ -154,6 +154,40 @@ input[type="text"], input[type="password"], input[type="url"] {
   line-height: 1.4;
 }
 
+.work-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.work-controls select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--card-bg);
+}
+
+.review-card.flagged {
+  border: 3px solid var(--danger);
+}
+
+.review-card .useful-rank {
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.flag-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
 .summary-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

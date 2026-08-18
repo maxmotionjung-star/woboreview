@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>WORK - 무신사 리뷰 모니터</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>무신사 포토후기 TOP10 모니터</h1>
+    <nav class="tabs">
+      <a href="/index.html">대시보드</a>
+      <a href="/history.html">변동이력</a>
+      <a href="/work.html" class="active">WORK</a>
+      <a href="/products.html">상품관리</a>
+      <a href="#" id="logoutLink">로그아웃</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="work-controls">
+      <select id="productSelect"></select>
+      <div class="range-toggle" id="limitToggle">
+        <button data-limit="10">TOP 10</button>
+        <button data-limit="20" class="active">TOP 20</button>
+        <button data-limit="30">TOP 30</button>
+      </div>
+      <button class="secondary" id="refreshBtn">새로고침</button>
+    </div>
+    <p class="muted">선택한 상품의 사진후기를 최신순으로 보여줍니다. 각 리뷰가 유용한순 기준 몇 위인지 함께 표시되고, 빨간 테두리로 표시한 리뷰는 기기와 상관없이 계속 저장됩니다. 표시한 리뷰는 이미지를 클릭해 무신사에서 직접 "도움돼요"를 눌러주세요.</p>
+    <div id="content">불러오는 중...</div>
+  </main>
+
+  <script src="/common.js"></script>
+  <script>
+    document.getElementById("logoutLink").addEventListener("click", (e) => { e.preventDefault(); logout(); });
+
+    let currentLimit = 20;
+    let products = [];
+
+    function usefulRankText(r) {
+      return r.usefulRank ? `유용순 ${r.usefulRank}위` : `유용순위 밖 (TOP ${currentLimit} 기준)`;
+    }
+
+    function reviewCardHtml(r) {
+      const img = r.imageUrl
+        ? `<img src="${r.imageUrl}" alt="리뷰 이미지" loading="lazy" />`
+        : `<div style="aspect-ratio:1;background:#eee"></div>`;
+      return `
+        <div class="review-card work-card ${r.flagged ? "flagged" : ""}" data-review-no="${r.reviewNo}">
+          <a href="${r.reviewUrl}" target="_blank" rel="noopener">${img}</a>
+          <div class="body">
+            <div>${r.nickname ?? "익명"}</div>
+            <div>${gradeStars(r.grade)} · 👍 ${r.likeCount ?? 0}</div>
+            <div class="muted">등록일 ${formatDateOnly(r.postedAt)}</div>
+            <div class="useful-rank">${usefulRankText(r)}</div>
+            <div class="review-text">${(r.content ?? "").trim() || "(작성된 텍스트 없음)"}</div>
+            <label class="flag-toggle">
+              <input type="checkbox" data-flag-toggle ${r.flagged ? "checked" : ""} />
+              도움돼요 필요 표시
+            </label>
+          </div>
+        </div>`;
+    }
+
+    async function loadProductOptions() {
+      products = await api("/api/products");
+      const select = document.getElementById("productSelect");
+      if (products.length === 0) {
+        select.innerHTML = `<option>등록된 상품이 없습니다</option>`;
+        return null;
+      }
+      select.innerHTML = products
+        .map((p) => `<option value="${p.id}">${p.name ?? "상품 " + p.goods_no}</option>`)
+        .join("");
+      return products[0].id;
+    }
+
+    async function loadWork() {
+      const content = document.getElementById("content");
+      const productId = document.getElementById("productSelect").value;
+      if (!productId) {
+        content.innerHTML = `<div class="muted">등록된 상품이 없습니다. <a href="/products.html">상품관리</a>에서 추가하세요.</div>`;
+        return;
+      }
+      content.innerHTML = "불러오는 중...";
+      const list = await api(`/api/work/${productId}?limit=${currentLimit}`);
+      if (list.length === 0) {
+        content.innerHTML = `<div class="muted">사진후기가 없습니다.</div>`;
+        return;
+      }
+      content.innerHTML = `<div class="review-grid">${list.map(reviewCardHtml).join("")}</div>`;
+
+      content.querySelectorAll("[data-flag-toggle]").forEach((checkbox) => {
+        checkbox.addEventListener("change", async () => {
+          const card = checkbox.closest(".work-card");
+          const reviewNo = card.dataset.reviewNo;
+          const productId = document.getElementById("productSelect").value;
+          checkbox.disabled = true;
+          try {
+            if (checkbox.checked) {
+              await api(`/api/work/${productId}/flags`, {
+                method: "POST",
+                body: JSON.stringify({ reviewNo: Number(reviewNo) }),
+              });
+              card.classList.add("flagged");
+            } else {
+              await api(`/api/work/${productId}/flags/${reviewNo}`, { method: "DELETE" });
+              card.classList.remove("flagged");
+            }
+          } catch (e) {
+            alert(e.message);
+            checkbox.checked = !checkbox.checked;
+          } finally {
+            checkbox.disabled = false;
+          }
+        });
+      });
+    }
+
+    document.getElementById("limitToggle").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-limit]");
+      if (!btn) return;
+      document.querySelectorAll("#limitToggle button").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentLimit = Number(btn.dataset.limit);
+      loadWork();
+    });
+
+    document.getElementById("productSelect").addEventListener("change", loadWork);
+    document.getElementById("refreshBtn").addEventListener("click", loadWork);
+
+    requireAuthOrRedirect().then(async () => {
+      await loadProductOptions();
+      loadWork();
+    });
+  </script>
+</body>
+</html>

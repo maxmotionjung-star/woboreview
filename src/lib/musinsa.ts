@@ -11,6 +11,7 @@ export interface TopReview {
 }
 
 const IMAGE_CDN_BASE = "https://image.msscdn.net";
+const MAX_PAGE_SIZE = 20; // 무신사 API 제약: pageSize는 20 이하만 허용됨
 
 /**
  * 상품 URL 또는 순수 상품코드 문자열에서 무신사 goodsNo를 추출한다.
@@ -41,16 +42,18 @@ interface MusinsaReviewListResponse {
   };
 }
 
-/**
- * "사진후기만 체크 + 유용한순 정렬" 기준 TOP10 리뷰를 가져온다.
- * 무신사 비공식 내부 API(goods.musinsa.com)를 사용하므로 실제 브라우저와
- * 유사한 헤더를 보내고, 실패 시 예외를 던져 상위 호출부에서 해당 사이클을 스킵하게 한다.
- */
-export async function fetchTop10PhotoReviews(goodsNo: string): Promise<TopReview[]> {
+type MusinsaSort = "up_cnt_desc" | "new";
+
+async function fetchReviewPage(
+  goodsNo: string,
+  sort: MusinsaSort,
+  page: number,
+  pageSize: number
+): Promise<Omit<TopReview, "rank">[]> {
   const url =
     `https://goods.musinsa.com/api2/review/v1/view/list` +
-    `?page=0&pageSize=10&goodsNo=${encodeURIComponent(goodsNo)}` +
-    `&sort=up_cnt_desc&myFilter=false&hasPhoto=true&isExperience=false`;
+    `?page=${page}&pageSize=${pageSize}&goodsNo=${encodeURIComponent(goodsNo)}` +
+    `&sort=${sort}&myFilter=false&hasPhoto=true&isExperience=false`;
 
   const res = await fetch(url, {
     headers: {
@@ -68,9 +71,8 @@ export async function fetchTop10PhotoReviews(goodsNo: string): Promise<TopReview
   const body = (await res.json()) as MusinsaReviewListResponse;
   const list = body.data?.list ?? [];
 
-  return list.map((item, idx) => ({
+  return list.map((item) => ({
     reviewNo: item.no,
-    rank: idx + 1,
     nickname: item.userProfileInfo?.userNickName ?? "익명",
     grade: item.grade ?? null,
     content: item.content ?? "",
@@ -79,4 +81,45 @@ export async function fetchTop10PhotoReviews(goodsNo: string): Promise<TopReview
     reviewUrl: `https://www.musinsa.com/review/${item.no}`,
     postedAt: item.createDate ?? null,
   }));
+}
+
+/** pageSize 20 제한을 넘는 개수를 요청하면 여러 페이지로 나눠 이어붙인다. */
+async function fetchReviewsUpTo(
+  goodsNo: string,
+  sort: MusinsaSort,
+  limit: number
+): Promise<TopReview[]> {
+  const results: Omit<TopReview, "rank">[] = [];
+  let page = 0;
+  while (results.length < limit) {
+    const pageSize = Math.min(MAX_PAGE_SIZE, limit - results.length);
+    const items = await fetchReviewPage(goodsNo, sort, page, pageSize);
+    results.push(...items);
+    if (items.length < pageSize) break; // 더 이상 리뷰가 없음
+    page += 1;
+  }
+  return results.map((r, idx) => ({ ...r, rank: idx + 1 }));
+}
+
+/**
+ * "사진후기만 체크 + 유용한순 정렬" 기준 TOP10 리뷰를 가져온다.
+ * 무신사 비공식 내부 API(goods.musinsa.com)를 사용하므로 실제 브라우저와
+ * 유사한 헤더를 보내고, 실패 시 예외를 던져 상위 호출부에서 해당 사이클을 스킵하게 한다.
+ */
+export async function fetchTop10PhotoReviews(goodsNo: string): Promise<TopReview[]> {
+  return fetchReviewsUpTo(goodsNo, "up_cnt_desc", 10);
+}
+
+/** "사진후기만 체크 + 최신순 정렬" 기준 리뷰 N개를 가져온다 (WORK 화면용). */
+export async function fetchLatestPhotoReviews(goodsNo: string, limit: number): Promise<TopReview[]> {
+  return fetchReviewsUpTo(goodsNo, "new", limit);
+}
+
+/** 사진후기 유용한순 기준 상위 N개에서 review_no -> 순위 매핑을 만든다 (WORK 화면용). */
+export async function fetchUsefulRankMap(
+  goodsNo: string,
+  limit: number
+): Promise<Map<number, number>> {
+  const reviews = await fetchReviewsUpTo(goodsNo, "up_cnt_desc", limit);
+  return new Map(reviews.map((r) => [r.reviewNo, r.rank]));
 }

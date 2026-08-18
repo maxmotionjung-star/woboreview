@@ -54,3 +54,12 @@ ALTER TABLE rank_changes ADD COLUMN IF NOT EXISTS like_count INTEGER;
 
 CREATE INDEX IF NOT EXISTS idx_rank_changes_product_detected
   ON rank_changes (product_id, detected_at DESC);
+
+-- WORK 화면에서 "도움돼요 눌러야 할 리뷰"로 표시(빨간 테두리)한 기록. 기기 간 공유를 위해 DB에 저장.
+CREATE TABLE IF NOT EXISTS review_flags (
+  id SERIAL PRIMARY KEY,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  review_no BIGINT NOT NULL,
+  flagged_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (product_id, review_no)
+);
