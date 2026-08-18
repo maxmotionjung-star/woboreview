@@ -31,9 +31,11 @@ async function getLatestSnapshot(productId: number): Promise<TopReview[]> {
     rank: number;
     nickname: string;
     grade: string | null;
+    content: string | null;
     image_url: string | null;
+    like_count: number | null;
   }>(
-    `SELECT review_no, rank, nickname, grade, image_url
+    `SELECT review_no, rank, nickname, grade, content, image_url, like_count
      FROM review_snapshots
      WHERE product_id = $1
        AND captured_at = (SELECT MAX(captured_at) FROM review_snapshots WHERE product_id = $1)
@@ -46,8 +48,10 @@ async function getLatestSnapshot(productId: number): Promise<TopReview[]> {
     rank: r.rank,
     nickname: r.nickname,
     grade: r.grade,
-    content: "",
+    content: r.content ?? "",
     imageUrl: r.image_url,
+    likeCount: r.like_count ?? 0,
+    reviewUrl: `https://www.musinsa.com/review/${r.review_no}`,
   }));
 }
 
@@ -56,14 +60,24 @@ async function saveSnapshot(productId: number, reviews: TopReview[], capturedAt:
 
   const values: unknown[] = [];
   const placeholders = reviews.map((r, i) => {
-    const base = i * 8;
-    values.push(productId, r.reviewNo, r.rank, r.nickname, r.grade, r.content, r.imageUrl, capturedAt);
-    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
+    const base = i * 9;
+    values.push(
+      productId,
+      r.reviewNo,
+      r.rank,
+      r.nickname,
+      r.grade,
+      r.content,
+      r.imageUrl,
+      r.likeCount,
+      capturedAt
+    );
+    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`;
   });
 
   await pool.query(
     `INSERT INTO review_snapshots
-       (product_id, review_no, rank, nickname, grade, content, image_url, captured_at)
+       (product_id, review_no, rank, nickname, grade, content, image_url, like_count, captured_at)
      VALUES ${placeholders.join(", ")}`,
     values
   );

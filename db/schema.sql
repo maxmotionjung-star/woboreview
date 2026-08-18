@@ -17,8 +17,12 @@ CREATE TABLE IF NOT EXISTS review_snapshots (
   grade TEXT,
   content TEXT,
   image_url TEXT,
+  like_count INTEGER,
   captured_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- 기존 DB(이미 review_snapshots가 like_count 없이 생성된 경우)에도 안전하게 적용되도록 별도 ALTER
+ALTER TABLE review_snapshots ADD COLUMN IF NOT EXISTS like_count INTEGER;
 
 CREATE INDEX IF NOT EXISTS idx_review_snapshots_product_captured
   ON review_snapshots (product_id, captured_at DESC);

@@ -18,11 +18,23 @@
   </header>
 
   <main>
+    <div id="summaryBar" class="summary-bar"></div>
+
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <span class="muted">사진후기만 · 유용한순 정렬 기준 TOP10</span>
       <button id="checkAllBtn">전체 지금 체크</button>
     </div>
     <div id="content">불러오는 중...</div>
+
+    <div class="section-heading">
+      <h2>최근 순위 변동</h2>
+      <div class="range-toggle" id="rangeToggle">
+        <button data-days="1" class="active">1일</button>
+        <button data-days="3">3일</button>
+        <button data-days="7">7일</button>
+      </div>
+    </div>
+    <div id="recentChanges">불러오는 중...</div>
   </main>
 
   <script src="/common.js"></script>
@@ -35,11 +47,12 @@
         : `<div style="aspect-ratio:1;background:#eee"></div>`;
       return `
         <div class="review-card">
-          ${img}
+          <a href="${r.review_url}" target="_blank" rel="noopener">${img}</a>
           <div class="body">
             <div class="rank">${r.rank}위</div>
             <div>${r.nickname ?? "익명"}</div>
-            <div>${gradeStars(r.grade)}</div>
+            <div>${gradeStars(r.grade)} · 👍 ${r.like_count ?? 0}</div>
+            <div class="review-text">${(r.content ?? "").trim() || "(작성된 텍스트 없음)"}</div>
           </div>
         </div>`;
     }
@@ -70,6 +83,71 @@
         </div>`;
     }
 
+    async function loadSummary() {
+      const bar = document.getElementById("summaryBar");
+      try {
+        const s = await api("/api/summary");
+        const lastChecked = s.lastCheckedAt ? formatDate(s.lastCheckedAt) : "체크 기록 없음";
+        bar.innerHTML = `
+          <div class="summary-card">
+            <div class="summary-value">${s.productCount}</div>
+            <div class="summary-label">모니터링 상품</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value">${s.changesLast24h}</div>
+            <div class="summary-label">최근 24시간 변동</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value">${s.changesLast7d}</div>
+            <div class="summary-label">최근 7일 변동</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value summary-value-small">${lastChecked}</div>
+            <div class="summary-label">마지막 체크</div>
+          </div>`;
+      } catch (e) {
+        bar.innerHTML = "";
+      }
+    }
+
+    function rankSummary(c) {
+      if (c.change_type === "entered") {
+        return c.old_rank ? `${c.old_rank}위 → ${c.new_rank}위` : `신규 진입 ${c.new_rank}위`;
+      }
+      return `TOP10 이탈 (이전 ${c.old_rank}위)`;
+    }
+
+    async function loadRecentChanges(days) {
+      const box = document.getElementById("recentChanges");
+      box.innerHTML = "불러오는 중...";
+      const changes = await api(`/api/changes?days=${days}`);
+      if (changes.length === 0) {
+        box.innerHTML = `<div class="muted">선택한 기간 동안 변동 이력이 없습니다.</div>`;
+        return;
+      }
+      const rows = changes.map((c) => `
+        <tr>
+          <td>${formatDate(c.detected_at)}</td>
+          <td>${c.product_name ?? "상품 " + c.goods_no}</td>
+          <td><span class="badge ${c.change_type}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
+          <td>${rankSummary(c)}</td>
+          <td>${c.nickname ?? "익명"}</td>
+        </tr>`).join("");
+      box.innerHTML = `
+        <table>
+          <thead><tr><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    document.getElementById("rangeToggle").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-days]");
+      if (!btn) return;
+      document.querySelectorAll("#rangeToggle button").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      loadRecentChanges(Number(btn.dataset.days));
+    });
+
     async function loadDashboard() {
       const content = document.getElementById("content");
       const products = await api("/api/products");
@@ -89,7 +167,7 @@
               method: "POST",
               body: JSON.stringify({ productId: Number(btn.dataset.checkProduct) }),
             });
-            await loadDashboard();
+            await Promise.all([loadDashboard(), loadSummary()]);
           } catch (e) {
             alert(e.message);
             btn.disabled = false;
@@ -105,7 +183,7 @@
       btn.textContent = "체크 중...";
       try {
         await api("/api/check-now", { method: "POST", body: JSON.stringify({}) });
-        await loadDashboard();
+        await Promise.all([loadDashboard(), loadSummary()]);
       } catch (e) {
         alert(e.message);
       } finally {
@@ -114,7 +192,11 @@
       }
     });
 
-    requireAuthOrRedirect().then(loadDashboard);
+    requireAuthOrRedirect().then(() => {
+      loadSummary();
+      loadDashboard();
+      loadRecentChanges(1);
+    });
   </script>
 </body>
 </html>

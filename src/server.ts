@@ -7,6 +7,7 @@ import { productsRouter } from "./routes/products";
 import { changesRouter } from "./routes/changes";
 import { checkRouter } from "./routes/check";
 import { cronRouter } from "./routes/cron";
+import { summaryRouter } from "./routes/summary";
 
 if (!process.env.SESSION_SECRET) {
   throw new Error("SESSION_SECRET 환경변수가 설정되어 있지 않습니다. .env를 확인하세요.");
@@ -28,6 +29,7 @@ app.get("/api/me", me);
 app.use("/api/products", requireAuth, productsRouter);
 app.use("/api/changes", requireAuth, changesRouter);
 app.use("/api/check-now", requireAuth, checkRouter);
+app.use("/api/summary", requireAuth, summaryRouter);
 app.use("/api/cron", cronRouter);
 
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {

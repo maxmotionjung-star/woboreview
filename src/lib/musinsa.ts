@@ -5,6 +5,8 @@ export interface TopReview {
   grade: string | null;
   content: string;
   imageUrl: string | null;
+  likeCount: number;
+  reviewUrl: string;
 }
 
 const IMAGE_CDN_BASE = "https://image.msscdn.net";
@@ -32,6 +34,7 @@ interface MusinsaReviewListResponse {
       grade: string | null;
       images?: Array<{ imageUrl: string }>;
       userProfileInfo?: { userNickName?: string };
+      likeCount?: number;
     }>;
   };
 }
@@ -70,5 +73,7 @@ export async function fetchTop10PhotoReviews(goodsNo: string): Promise<TopReview
     grade: item.grade ?? null,
     content: item.content ?? "",
     imageUrl: item.images?.[0]?.imageUrl ? `${IMAGE_CDN_BASE}${item.images[0].imageUrl}` : null,
+    likeCount: item.likeCount ?? 0,
+    reviewUrl: `https://www.musinsa.com/review/${item.no}`,
   }));
 }
