@@ -18,18 +18,5 @@ services:
         sync: false
       - key: SESSION_SECRET
         sync: false
-
-  - type: cron
-    name: musinsa-review-monitor-check
-    runtime: node
-    plan: free
-    schedule: "0 * * * *"
-    buildCommand: npm install && npm run build
-    startCommand: npm run check:build
-    envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: TELEGRAM_BOT_TOKEN
-        sync: false
-      - key: TELEGRAM_CHAT_ID
+      - key: CRON_SECRET
         sync: false

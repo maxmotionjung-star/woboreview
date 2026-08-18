@@ -1,0 +1,19 @@
+name: Hourly Musinsa review check
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  trigger-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call check endpoint
+        run: |
+          curl --fail --show-error --max-time 90 \
+            -X POST "${RENDER_APP_URL}/api/cron/check" \
+            -H "x-cron-secret: ${CRON_SECRET}"
+        env:
+          RENDER_APP_URL: ${{ secrets.RENDER_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
