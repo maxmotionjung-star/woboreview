@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: musinsa-review-monitor-web
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: DASHBOARD_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+
+  - type: cron
+    name: musinsa-review-monitor-check
+    runtime: node
+    plan: free
+    schedule: "0 * * * *"
+    buildCommand: npm install && npm run build
+    startCommand: npm run check:build
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false

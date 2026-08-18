@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>대시보드 - 무신사 리뷰 모니터</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>무신사 포토후기 TOP10 모니터</h1>
+    <nav class="tabs">
+      <a href="/index.html" class="active">대시보드</a>
+      <a href="/history.html">변동이력</a>
+      <a href="/products.html">상품관리</a>
+      <a href="#" id="logoutLink">로그아웃</a>
+    </nav>
+  </header>
+
+  <main>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <span class="muted">사진후기만 · 유용한순 정렬 기준 TOP10</span>
+      <button id="checkAllBtn">전체 지금 체크</button>
+    </div>
+    <div id="content">불러오는 중...</div>
+  </main>
+
+  <script src="/common.js"></script>
+  <script>
+    document.getElementById("logoutLink").addEventListener("click", (e) => { e.preventDefault(); logout(); });
+
+    function reviewCardHtml(r) {
+      const img = r.image_url
+        ? `<img src="${r.image_url}" alt="리뷰 이미지" loading="lazy" />`
+        : `<div style="aspect-ratio:1;background:#eee"></div>`;
+      return `
+        <div class="review-card">
+          ${img}
+          <div class="body">
+            <div class="rank">${r.rank}위</div>
+            <div>${r.nickname ?? "익명"}</div>
+            <div>${gradeStars(r.grade)}</div>
+          </div>
+        </div>`;
+    }
+
+    async function renderProduct(p) {
+      let top10 = [];
+      try {
+        top10 = await api(`/api/products/${p.id}/top10`);
+      } catch (e) {
+        // ignore, show empty state below
+      }
+
+      const capturedAt = top10[0]?.captured_at ? formatDate(top10[0].captured_at) : null;
+      const grid = top10.length
+        ? `<div class="review-grid">${top10.map(reviewCardHtml).join("")}</div>`
+        : `<div class="muted">아직 체크 기록이 없습니다. "지금 체크"를 눌러 첫 스냅샷을 만드세요.</div>`;
+
+      return `
+        <div class="product-block">
+          <div class="product-block-header">
+            <div>
+              <strong>${p.name ?? "상품 " + p.goods_no}</strong>
+              <div class="muted">goodsNo: ${p.goods_no}${capturedAt ? " · 마지막 체크: " + capturedAt : ""}</div>
+            </div>
+            <button class="secondary" data-check-product="${p.id}">지금 체크</button>
+          </div>
+          ${grid}
+        </div>`;
+    }
+
+    async function loadDashboard() {
+      const content = document.getElementById("content");
+      const products = await api("/api/products");
+      if (products.length === 0) {
+        content.innerHTML = `<div class="muted">등록된 상품이 없습니다. <a href="/products.html">상품관리</a>에서 추가하세요.</div>`;
+        return;
+      }
+      const blocks = await Promise.all(products.filter((p) => p.active).map(renderProduct));
+      content.innerHTML = blocks.join("");
+
+      content.querySelectorAll("[data-check-product]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          btn.disabled = true;
+          btn.textContent = "체크 중...";
+          try {
+            await api("/api/check-now", {
+              method: "POST",
+              body: JSON.stringify({ productId: Number(btn.dataset.checkProduct) }),
+            });
+            await loadDashboard();
+          } catch (e) {
+            alert(e.message);
+            btn.disabled = false;
+            btn.textContent = "지금 체크";
+          }
+        });
+      });
+    }
+
+    document.getElementById("checkAllBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("checkAllBtn");
+      btn.disabled = true;
+      btn.textContent = "체크 중...";
+      try {
+        await api("/api/check-now", { method: "POST", body: JSON.stringify({}) });
+        await loadDashboard();
+      } catch (e) {
+        alert(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "전체 지금 체크";
+      }
+    });
+
+    requireAuthOrRedirect().then(loadDashboard);
+  </script>
+</body>
+</html>
