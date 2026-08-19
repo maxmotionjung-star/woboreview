@@ -1,34 +1,41 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="wireframe">
 <head>
   <meta charset="utf-8" />
   <title>WORK - 무신사 리뷰 모니터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/style.css" />
 </head>
-<body>
-  <header class="topbar">
-    <h1>무신사 포토후기 TOP10 모니터</h1>
-    <nav class="tabs">
-      <a href="/index.html">대시보드</a>
-      <a href="/history.html">변동이력</a>
-      <a href="/work.html" class="active">WORK</a>
-      <a href="/products.html">상품관리</a>
-      <a href="#" id="logoutLink">로그아웃</a>
-    </nav>
-  </header>
+<body class="bg-base-200 min-h-screen">
+  <div class="navbar bg-base-100 border-b border-base-300 px-4">
+    <div class="flex-1">
+      <span class="text-lg font-semibold">무신사 포토후기 TOP10 모니터</span>
+    </div>
+    <div class="flex-none">
+      <div class="tabs tabs-boxed">
+        <a href="/index.html" class="tab">대시보드</a>
+        <a href="/history.html" class="tab">변동이력</a>
+        <a href="/work.html" class="tab tab-active">WORK</a>
+        <a href="/products.html" class="tab">상품관리</a>
+        <a href="#" id="logoutLink" class="tab">로그아웃</a>
+      </div>
+    </div>
+  </div>
 
   <main>
-    <div class="work-controls">
-      <select id="productSelect"></select>
-      <div class="range-toggle" id="limitToggle">
-        <button data-limit="10">TOP 10</button>
-        <button data-limit="20" class="active">TOP 20</button>
-        <button data-limit="30">TOP 30</button>
+    <div class="flex flex-wrap items-center gap-3 mb-3">
+      <select id="productSelect" class="select select-bordered"></select>
+      <div class="join" id="limitToggle">
+        <button data-limit="10" class="btn btn-sm join-item">TOP 10</button>
+        <button data-limit="20" class="btn btn-sm join-item btn-active">TOP 20</button>
+        <button data-limit="30" class="btn btn-sm join-item">TOP 30</button>
       </div>
-      <button class="secondary" id="refreshBtn">새로고침</button>
+      <button class="btn btn-outline btn-sm" id="refreshBtn">새로고침</button>
     </div>
-    <p class="muted">선택한 상품의 사진후기를 최신순으로 보여줍니다. 각 리뷰가 유용한순 기준 몇 위인지 함께 표시되고, 빨간 테두리로 표시한 리뷰는 기기와 상관없이 계속 저장됩니다. 썸네일을 클릭하면 사진을 크게(여러 장이면 넘겨가며) 볼 수 있고, "👍 도움돼요" 링크를 클릭하면 무신사 리뷰 페이지로 이동해 직접 "도움돼요"를 누를 수 있습니다.</p>
+    <p class="muted mb-4">선택한 상품의 사진후기를 최신순으로 보여줍니다. 각 리뷰가 유용한순 기준 몇 위인지 함께 표시되고, 빨간 테두리로 표시한 리뷰는 기기와 상관없이 계속 저장됩니다. 썸네일을 클릭하면 사진을 크게(여러 장이면 넘겨가며) 볼 수 있고, "👍 도움돼요" 링크를 클릭하면 무신사 리뷰 페이지로 이동해 직접 "도움돼요"를 누를 수 있습니다.</p>
     <div id="content">불러오는 중...</div>
   </main>
 
@@ -53,16 +60,16 @@
         : `<div style="aspect-ratio:1;background:#eee"></div>`;
       const badge = images.length > 1 ? `<span class="multi-badge">1/${images.length}</span>` : "";
       return `
-        <div class="review-card work-card ${r.flagged ? "flagged" : ""}" data-review-no="${r.reviewNo}">
+        <div class="review-card work-card card card-compact bg-base-100 border border-base-300 ${r.flagged ? "flagged" : ""}" data-review-no="${r.reviewNo}">
           <button type="button" class="thumb-btn" data-thumb-review="${r.reviewNo}">${img}${badge}</button>
-          <div class="body">
+          <div class="body card-body">
             <div>${r.nickname ?? "익명"}</div>
-            <div>${gradeStars(r.grade)} · <a class="helpful-link" href="${r.reviewUrl}" target="_blank" rel="noopener">👍 도움돼요 ${r.likeCount ?? 0}</a></div>
+            <div>${gradeStars(r.grade)} · <a class="link" href="${r.reviewUrl}" target="_blank" rel="noopener">👍 도움돼요 ${r.likeCount ?? 0}</a></div>
             <div class="muted">등록일 ${formatDateOnly(r.postedAt)}</div>
             <div class="useful-rank">${usefulRankText(r)}</div>
             <div class="review-text">${(r.content ?? "").trim() || "(작성된 텍스트 없음)"}</div>
             <label class="flag-toggle">
-              <input type="checkbox" data-flag-toggle ${r.flagged ? "checked" : ""} />
+              <input type="checkbox" data-flag-toggle class="checkbox checkbox-sm" ${r.flagged ? "checked" : ""} />
               도움돼요 필요 표시
             </label>
           </div>
@@ -134,8 +141,8 @@
     document.getElementById("limitToggle").addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-limit]");
       if (!btn) return;
-      document.querySelectorAll("#limitToggle button").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
+      document.querySelectorAll("#limitToggle button").forEach((b) => b.classList.remove("btn-active"));
+      btn.classList.add("btn-active");
       currentLimit = Number(btn.dataset.limit);
       loadWork();
     });

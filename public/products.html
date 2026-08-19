@@ -1,31 +1,38 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-theme="wireframe">
 <head>
   <meta charset="utf-8" />
   <title>상품관리 - 무신사 리뷰 모니터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/style.css" />
 </head>
-<body>
-  <header class="topbar">
-    <h1>무신사 포토후기 TOP10 모니터</h1>
-    <nav class="tabs">
-      <a href="/index.html">대시보드</a>
-      <a href="/history.html">변동이력</a>
-      <a href="/work.html">WORK</a>
-      <a href="/products.html" class="active">상품관리</a>
-      <a href="#" id="logoutLink">로그아웃</a>
-    </nav>
-  </header>
+<body class="bg-base-200 min-h-screen">
+  <div class="navbar bg-base-100 border-b border-base-300 px-4">
+    <div class="flex-1">
+      <span class="text-lg font-semibold">무신사 포토후기 TOP10 모니터</span>
+    </div>
+    <div class="flex-none">
+      <div class="tabs tabs-boxed">
+        <a href="/index.html" class="tab">대시보드</a>
+        <a href="/history.html" class="tab">변동이력</a>
+        <a href="/work.html" class="tab">WORK</a>
+        <a href="/products.html" class="tab tab-active">상품관리</a>
+        <a href="#" id="logoutLink" class="tab">로그아웃</a>
+      </div>
+    </div>
+  </div>
 
   <main>
-    <form class="add-product-form" id="addForm">
-      <input type="url" id="url" placeholder="무신사 상품 URL (예: https://www.musinsa.com/products/5717317)" required />
-      <input type="text" id="name" placeholder="표시할 이름 (선택)" style="max-width:200px" />
-      <input type="submit" value="추가" />
+    <form class="flex flex-wrap gap-2 mb-2" id="addForm">
+      <input type="url" id="url" placeholder="무신사 상품 URL (예: https://www.musinsa.com/products/5717317)" required class="input input-bordered flex-1 min-w-[260px]" />
+      <input type="text" id="name" placeholder="표시할 이름 (선택)" class="input input-bordered w-48" />
+      <input type="submit" value="추가" class="btn btn-primary" />
     </form>
     <div class="error-text" id="errorText"></div>
-    <div id="content">불러오는 중...</div>
+    <div id="content" class="mt-4">불러오는 중...</div>
   </main>
 
   <script src="/common.js"></script>
@@ -40,16 +47,16 @@
         return;
       }
       content.innerHTML = products.map((p, i) => `
-        <div class="product-list-item">
-          <div class="reorder-buttons">
-            <button class="secondary" data-move="up" data-id="${p.id}" ${i === 0 ? "disabled" : ""}>▲</button>
-            <button class="secondary" data-move="down" data-id="${p.id}" ${i === products.length - 1 ? "disabled" : ""}>▼</button>
+        <div class="flex items-center gap-3 p-3 border border-base-300 rounded-box bg-base-100 mb-2">
+          <div class="join join-vertical">
+            <button class="btn btn-xs join-item" data-move="up" data-id="${p.id}" ${i === 0 ? "disabled" : ""}>▲</button>
+            <button class="btn btn-xs join-item" data-move="down" data-id="${p.id}" ${i === products.length - 1 ? "disabled" : ""}>▼</button>
           </div>
-          <div style="flex:1">
+          <div class="flex-1">
             <strong>${p.name ?? "상품 " + p.goods_no}</strong>
             <div class="muted">${p.url}</div>
           </div>
-          <button class="danger" data-delete="${p.id}">삭제</button>
+          <button class="btn btn-error btn-sm" data-delete="${p.id}">삭제</button>
         </div>`).join("");
 
       content.querySelectorAll("[data-delete]").forEach((btn) => {

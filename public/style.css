@@ -1,131 +1,51 @@
-:root {
-  color-scheme: light;
-  --bg: #f5f6f8;
-  --card-bg: #ffffff;
-  --text: #1a1a1a;
-  --muted: #6b7280;
-  --border: #e5e7eb;
-  --accent: #2563eb;
-  --danger: #dc2626;
-  --enter: #16a34a;
-  --drop: #dc2626;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-
-header.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
-  background: var(--card-bg);
-  border-bottom: 1px solid var(--border);
-}
-
-header.topbar h1 {
-  font-size: 16px;
-  margin: 0;
-}
-
-nav.tabs {
-  display: flex;
-  gap: 4px;
-}
-
-nav.tabs a {
-  padding: 6px 12px;
-  border-radius: 6px;
-  text-decoration: none;
-  color: var(--muted);
-  font-size: 14px;
-}
-
-nav.tabs a.active,
-nav.tabs a:hover {
-  background: var(--bg);
-  color: var(--text);
-}
+/* 이 파일은 DaisyUI(wireframe 테마) + Tailwind CDN으로 다루기 어려운
+   앱 전용 컴포넌트만 담당한다. 일반 버튼/입력/카드/테이블/내비게이션 등은
+   각 HTML의 DaisyUI 클래스가 처리하므로 여기서 재정의하지 않는다. */
 
 main {
-  max-width: 960px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
 }
 
-button, input[type="submit"] {
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 14px;
-  font-size: 14px;
-  background: var(--accent);
-  color: white;
-}
+.muted { opacity: 0.6; font-size: 13px; }
 
-button.secondary {
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
+.error-text { color: #dc2626; font-size: 13px; margin-top: 8px; }
 
-button.danger {
-  background: var(--danger);
-}
-
-input[type="text"], input[type="password"], input[type="url"] {
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 14px;
-  width: 100%;
-}
-
-.login-box {
-  max-width: 320px;
-  margin: 80px auto;
-  background: var(--card-bg);
-  padding: 24px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-}
-
-.product-block {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 20px;
-}
-
-.product-block-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
+/* ---- 리뷰 카드 그리드 (대시보드 / WORK 공용) ---- */
 .review-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 10px;
 }
 
-.review-card {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--bg);
-  font-size: 12px;
+.review-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  background: #eee;
 }
 
-.review-card a { display: block; }
+.review-card .review-text {
+  margin-top: 6px;
+  opacity: 0.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.review-card .useful-rank {
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.review-card.flagged {
+  outline: 3px solid #dc2626;
+  outline-offset: -1px;
+}
 
 .thumb-btn {
   display: block;
@@ -148,6 +68,7 @@ input[type="text"], input[type="password"], input[type="url"] {
   border-radius: 999px;
 }
 
+/* 순위 등락 배지: 상승=빨강, 하락=초록으로 테마와 무관하게 고정 */
 .rank-change-badge {
   display: inline-block;
   font-size: 11px;
@@ -162,58 +83,6 @@ input[type="text"], input[type="password"], input[type="url"] {
 .rank-change-badge.up { background: #dc2626; }
 .rank-change-badge.down { background: #16a34a; }
 
-.review-card img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  display: block;
-  background: #eee;
-}
-
-.review-card .body {
-  padding: 8px;
-}
-
-.review-card .rank {
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.review-card .review-text {
-  margin-top: 6px;
-  color: var(--muted);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.4;
-}
-
-.work-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.work-controls select {
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 14px;
-  background: var(--card-bg);
-}
-
-.review-card.flagged {
-  border: 3px solid var(--danger);
-}
-
-.review-card .useful-rank {
-  margin-top: 4px;
-  font-weight: 600;
-}
-
 .flag-toggle {
   display: flex;
   align-items: center;
@@ -223,140 +92,31 @@ input[type="text"], input[type="password"], input[type="url"] {
   cursor: pointer;
 }
 
-.summary-bar {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
-  margin-bottom: 20px;
-}
+/* 진입/이탈 배지 (변동이력 표) */
+.badge-entered { background: #16a34a !important; color: white !important; border-color: #16a34a !important; }
+.badge-dropped { background: #dc2626 !important; color: white !important; border-color: #dc2626 !important; }
 
-.summary-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  text-align: center;
-}
-
-.summary-value {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.summary-value-small {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.summary-label {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 28px 0 12px;
-}
-
-.section-heading h2 {
-  font-size: 15px;
-  margin: 0;
-}
-
-.range-toggle {
-  display: flex;
-  gap: 4px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 2px;
-}
-
-.range-toggle button {
-  background: transparent;
-  color: var(--muted);
-  padding: 5px 12px;
+/* 변동이력 표의 작은 썸네일 */
+.row-thumb-btn {
+  display: block;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: #eee;
   border-radius: 6px;
-  font-size: 13px;
-}
-
-.range-toggle button.active {
-  background: var(--accent);
-  color: white;
-}
-
-.muted { color: var(--muted); font-size: 13px; }
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
   overflow: hidden;
+  cursor: pointer;
 }
 
-th, td {
-  text-align: left;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
+.row-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-th { background: var(--bg); }
-
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  color: white;
-}
-
-.badge.entered { background: var(--enter); }
-.badge.dropped { background: var(--drop); }
-
-.product-list-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 8px;
-  background: var(--card-bg);
-}
-
-.reorder-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.reorder-buttons button {
-  padding: 2px 8px;
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-.reorder-buttons button:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-
-.add-product-form {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.add-product-form input { flex: 1; }
-
-.error-text { color: var(--danger); font-size: 13px; margin-top: 8px; }
-
+/* ---- 이미지 라이트박스 ---- */
 .lightbox-overlay {
   display: none;
   position: fixed;
@@ -412,29 +172,3 @@ th { background: var(--bg); }
   color: white;
   font-size: 13px;
 }
-
-.row-thumb-btn {
-  display: block;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  background: #eee;
-  border-radius: 6px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.row-thumb-btn img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.helpful-link {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.helpful-link:hover { text-decoration: underline; }
