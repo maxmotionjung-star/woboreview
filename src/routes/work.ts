@@ -1,6 +1,11 @@
 import { Router } from "express";
 import { pool } from "../db";
-import { fetchLatestPhotoReviews, fetchUsefulRankMap } from "../lib/musinsa";
+import {
+  fetchLatestPhotoReviews,
+  fetchUsefulPhotoReviews,
+  fetchUsefulRankMap,
+  fetchLatestRankMap,
+} from "../lib/musinsa";
 import { asyncHandler } from "../lib/asyncHandler";
 
 export const workRouter = Router();
@@ -13,6 +18,7 @@ workRouter.get(
     const id = Number(req.params.id);
     const requestedLimit = Number(req.query.limit);
     const limit = ALLOWED_LIMITS.includes(requestedLimit) ? requestedLimit : 20;
+    const sort = req.query.sort === "useful" ? "useful" : "new";
 
     const { rows: productRows } = await pool.query<{ goods_no: string }>(
       "SELECT goods_no FROM products WHERE id = $1",
@@ -24,9 +30,13 @@ workRouter.get(
       return;
     }
 
-    const [latest, usefulRankMap, flaggedRows] = await Promise.all([
-      fetchLatestPhotoReviews(product.goods_no, limit),
-      fetchUsefulRankMap(product.goods_no, limit),
+    const [primary, otherRankMap, flaggedRows] = await Promise.all([
+      sort === "new"
+        ? fetchLatestPhotoReviews(product.goods_no, limit)
+        : fetchUsefulPhotoReviews(product.goods_no, limit),
+      sort === "new"
+        ? fetchUsefulRankMap(product.goods_no, limit)
+        : fetchLatestRankMap(product.goods_no, limit),
       pool.query<{ review_no: string }>(
         "SELECT review_no FROM review_flags WHERE product_id = $1",
         [id]
@@ -35,10 +45,12 @@ workRouter.get(
 
     const flaggedSet = new Set(flaggedRows.rows.map((r) => Number(r.review_no)));
 
-    const list = latest.map((r) => ({
+    const list = primary.map((r) => ({
       reviewNo: r.reviewNo,
-      latestRank: r.rank,
-      usefulRank: usefulRankMap.get(r.reviewNo) ?? null,
+      // 현재 정렬 기준(sort)의 순위는 목록 위치(r.rank)이고, 반대 기준의 순위는 매핑에서 조회한다.
+      latestRank: sort === "new" ? r.rank : otherRankMap.get(r.reviewNo) ?? null,
+      usefulRank: sort === "new" ? otherRankMap.get(r.reviewNo) ?? null : r.rank,
+      sort,
       nickname: r.nickname,
       grade: r.grade,
       content: r.content,

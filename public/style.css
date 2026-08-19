@@ -526,6 +526,22 @@ main {
   flex-wrap: wrap;
 }
 
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.control-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink-muted-48);
+  letter-spacing: -0.224px;
+  min-width: 30px;
+}
+
 /* ---- 이미지 라이트박스 ---- */
 .lightbox-overlay {
   display: none;

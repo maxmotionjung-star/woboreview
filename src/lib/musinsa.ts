@@ -123,11 +123,25 @@ export async function fetchLatestPhotoReviews(goodsNo: string, limit: number): P
   return fetchReviewsUpTo(goodsNo, "new", limit);
 }
 
+/** "사진후기만 체크 + 유용한순 정렬" 기준 리뷰 N개를 가져온다 (WORK 화면용). */
+export async function fetchUsefulPhotoReviews(goodsNo: string, limit: number): Promise<TopReview[]> {
+  return fetchReviewsUpTo(goodsNo, "up_cnt_desc", limit);
+}
+
 /** 사진후기 유용한순 기준 상위 N개에서 review_no -> 순위 매핑을 만든다 (WORK 화면용). */
 export async function fetchUsefulRankMap(
   goodsNo: string,
   limit: number
 ): Promise<Map<number, number>> {
   const reviews = await fetchReviewsUpTo(goodsNo, "up_cnt_desc", limit);
+  return new Map(reviews.map((r) => [r.reviewNo, r.rank]));
+}
+
+/** 사진후기 최신순 기준 상위 N개에서 review_no -> 순위 매핑을 만든다 (WORK 화면용). */
+export async function fetchLatestRankMap(
+  goodsNo: string,
+  limit: number
+): Promise<Map<number, number>> {
+  const reviews = await fetchReviewsUpTo(goodsNo, "new", limit);
   return new Map(reviews.map((r) => [r.reviewNo, r.rank]));
 }
