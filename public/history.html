@@ -1,27 +1,21 @@
 <!doctype html>
-<html lang="ko" data-theme="wireframe">
+<html lang="ko">
 <head>
   <meta charset="utf-8" />
   <title>변동이력 - 무신사 리뷰 모니터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/style.css" />
 </head>
-<body class="bg-base-200 min-h-screen">
-  <div class="navbar bg-base-100 border-b border-base-300 px-4">
-    <div class="flex-1">
-      <span class="text-lg font-semibold">무신사 포토후기 TOP10 모니터</span>
-    </div>
-    <div class="flex-none">
-      <div class="tabs tabs-boxed">
-        <a href="/index.html" class="tab">대시보드</a>
-        <a href="/history.html" class="tab tab-active">변동이력</a>
-        <a href="/work.html" class="tab">WORK</a>
-        <a href="/products.html" class="tab">상품관리</a>
-        <a href="#" id="logoutLink" class="tab">로그아웃</a>
-      </div>
+<body>
+  <div class="apple-nav">
+    <span class="brand">무신사 포토후기 TOP10 모니터</span>
+    <div class="links">
+      <a href="/index.html">대시보드</a>
+      <a href="/history.html" class="active">변동이력</a>
+      <a href="/work.html">WORK</a>
+      <a href="/products.html">상품관리</a>
+      <a href="#" id="logoutLink">로그아웃</a>
     </div>
   </div>
 
@@ -63,17 +57,17 @@
           <td>${thumb}</td>
           <td>${formatDate(c.detected_at)}</td>
           <td>${c.product_name ?? "상품 " + c.goods_no}</td>
-          <td><span class="badge ${badgeClass}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
+          <td><span class="badge-pill ${badgeClass}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
           <td>${rankSummary(c)}</td>
           <td>${c.nickname ?? "익명"}</td>
           <td>${gradeStars(c.grade)}</td>
-          <td><a class="link" href="${c.review_url}" target="_blank" rel="noopener">${likeChangeText(c)}</a></td>
+          <td><a class="link-apple" href="${c.review_url}" target="_blank" rel="noopener">${likeChangeText(c)}</a></td>
         </tr>`;
       }).join("");
 
       content.innerHTML = `
-        <div class="overflow-x-auto">
-        <table class="table bg-base-100 border border-base-300">
+        <div class="table-wrap">
+        <table class="table-apple">
           <thead>
             <tr><th>사진</th><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>별점</th><th>도움돼요</th></tr>
           </thead>

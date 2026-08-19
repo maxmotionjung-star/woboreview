@@ -1,22 +1,249 @@
-/* 이 파일은 DaisyUI(wireframe 테마) + Tailwind CDN으로 다루기 어려운
-   앱 전용 컴포넌트만 담당한다. 일반 버튼/입력/카드/테이블/내비게이션 등은
-   각 HTML의 DaisyUI 클래스가 처리하므로 여기서 재정의하지 않는다. */
+/* Apple Store(apple.com/kr/store) 참고 디자인 시스템.
+   Tailwind CDN은 레이아웃 유틸리티로만 쓰고, 컴포넌트 룩은 여기서 정의한다. */
+
+:root {
+  --apple-blue: #0071e3;
+  --apple-blue-hover: #0077ed;
+  --apple-blue-active: #006edb;
+  --apple-bg: #f5f5f7;
+  --apple-surface: #ffffff;
+  --apple-text: #1d1d1f;
+  --apple-muted: #86868b;
+  --apple-border: rgba(0, 0, 0, 0.08);
+  --apple-danger: #ff3b30;
+  --apple-success: #1db954;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Text", "Malgun Gothic", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--apple-bg);
+  color: var(--apple-text);
+  -webkit-font-smoothing: antialiased;
+}
 
 main {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 32px 22px 60px;
 }
 
-.muted { opacity: 0.6; font-size: 13px; }
+.muted { color: var(--apple-muted); font-size: 13px; }
+.error-text { color: var(--apple-danger); font-size: 13px; margin-top: 10px; }
 
-.error-text { color: #dc2626; font-size: 13px; margin-top: 8px; }
+/* ---- 상단 내비게이션 ---- */
+.apple-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--apple-border);
+}
 
-/* ---- 리뷰 카드 그리드 (대시보드 / WORK 공용) ---- */
+.apple-nav .brand {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.apple-nav .links {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.apple-nav .links a {
+  font-size: 13px;
+  color: var(--apple-text);
+  text-decoration: none;
+  opacity: 0.72;
+  white-space: nowrap;
+}
+
+.apple-nav .links a:hover { opacity: 1; }
+.apple-nav .links a.active { opacity: 1; font-weight: 600; }
+
+/* ---- 버튼 ---- */
+.btn-apple {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 980px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 400;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: var(--apple-blue);
+  color: #fff;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-apple:hover { background: var(--apple-blue-hover); }
+.btn-apple:active { background: var(--apple-blue-active); }
+
+.btn-apple.secondary {
+  background: #fff;
+  color: var(--apple-text);
+  border-color: var(--apple-border);
+}
+.btn-apple.secondary:hover { background: #f5f5f7; }
+
+.btn-apple.danger { background: var(--apple-danger); }
+.btn-apple.danger:hover { background: #e0352b; }
+
+.btn-apple.small { padding: 6px 14px; font-size: 13px; }
+.btn-apple.xs { padding: 3px 10px; font-size: 12px; border-radius: 980px; }
+
+.btn-apple:disabled { opacity: 0.4; cursor: default; }
+
+/* ---- 입력창 ---- */
+.input-apple, select.input-apple {
+  border: 1px solid var(--apple-border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--apple-text);
+  font-family: inherit;
+}
+
+.input-apple:focus {
+  outline: 2px solid var(--apple-blue);
+  outline-offset: 1px;
+}
+
+/* ---- 세그먼트 토글 (1일/3일/7일, TOP10/20/30) ---- */
+.segmented {
+  display: inline-flex;
+  background: #e8e8ed;
+  border-radius: 980px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.segmented button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 16px;
+  font-size: 13px;
+  border-radius: 980px;
+  color: var(--apple-text);
+  transition: background 0.15s ease;
+}
+
+.segmented button.active {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  font-weight: 600;
+}
+
+/* ---- 카드 ---- */
+.card-apple {
+  background: var(--apple-surface);
+  border-radius: 18px;
+  border: 1px solid var(--apple-border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.login-card {
+  max-width: 360px;
+  margin: 100px auto 0;
+  padding: 32px;
+}
+
+.login-card h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 18px;
+}
+
+/* ---- 통계 바 ---- */
+.stats-apple {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--apple-border);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--apple-border);
+  margin-bottom: 32px;
+}
+
+.stat-apple {
+  background: var(--apple-surface);
+  text-align: center;
+  padding: 20px 12px;
+}
+
+.stat-apple .value {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.stat-apple .value.small { font-size: 15px; }
+
+.stat-apple .label {
+  font-size: 12px;
+  color: var(--apple-muted);
+  margin-top: 4px;
+}
+
+/* ---- 섹션 헤딩 ---- */
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 40px 0 14px;
+}
+
+.section-heading:first-child { margin-top: 0; }
+
+.section-heading h2 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* ---- 상품 블록 / 리뷰 카드 ---- */
+.product-block {
+  margin-bottom: 24px;
+  padding: 22px;
+}
+
+.product-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.product-block-header strong { font-size: 16px; }
+
 .review-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 10px;
+  gap: 14px;
+}
+
+.review-card {
+  overflow: hidden;
 }
 
 .review-card img {
@@ -27,9 +254,19 @@ main {
   background: #eee;
 }
 
+.review-card .body {
+  padding: 12px;
+  font-size: 12px;
+}
+
+.review-card .rank {
+  font-weight: 600;
+  font-size: 13px;
+}
+
 .review-card .review-text {
   margin-top: 6px;
-  opacity: 0.7;
+  color: var(--apple-muted);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -37,13 +274,10 @@ main {
   line-height: 1.4;
 }
 
-.review-card .useful-rank {
-  margin-top: 4px;
-  font-weight: 600;
-}
+.review-card .useful-rank { margin-top: 4px; font-weight: 600; }
 
 .review-card.flagged {
-  outline: 3px solid #dc2626;
+  outline: 2px solid var(--apple-danger);
   outline-offset: -1px;
 }
 
@@ -59,44 +293,91 @@ main {
 
 .thumb-btn .multi-badge {
   position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(0, 0, 0, 0.65);
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.55);
   color: white;
   font-size: 11px;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 999px;
+  backdrop-filter: blur(4px);
 }
 
 /* 순위 등락 배지: 상승=빨강, 하락=초록으로 테마와 무관하게 고정 */
 .rank-change-badge {
   display: inline-block;
   font-size: 11px;
-  font-weight: 700;
-  padding: 1px 6px;
+  font-weight: 600;
+  padding: 2px 8px;
   border-radius: 999px;
   color: white;
   white-space: nowrap;
   vertical-align: middle;
 }
 
-.rank-change-badge.up { background: #dc2626; }
-.rank-change-badge.down { background: #16a34a; }
+.rank-change-badge.up { background: var(--apple-danger); }
+.rank-change-badge.down { background: var(--apple-success); }
 
 .flag-toggle {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 12px;
   cursor: pointer;
+  color: var(--apple-muted);
 }
 
-/* 진입/이탈 배지 (변동이력 표) */
-.badge-entered { background: #16a34a !important; color: white !important; border-color: #16a34a !important; }
-.badge-dropped { background: #dc2626 !important; color: white !important; border-color: #dc2626 !important; }
+.link-apple {
+  color: var(--apple-blue);
+  text-decoration: none;
+}
+.link-apple:hover { text-decoration: underline; }
 
-/* 변동이력 표의 작은 썸네일 */
+/* ---- 진입/이탈 배지 ---- */
+.badge-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+.badge-entered { background: var(--apple-success); }
+.badge-dropped { background: var(--apple-danger); }
+
+/* ---- 표 ---- */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid var(--apple-border);
+  background: var(--apple-surface);
+}
+
+.table-apple {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-apple th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--apple-muted);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--apple-border);
+  white-space: nowrap;
+}
+
+.table-apple td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--apple-border);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.table-apple tr:last-child td { border-bottom: none; }
+
 .row-thumb-btn {
   display: block;
   width: 40px;
@@ -104,7 +385,7 @@ main {
   padding: 0;
   border: none;
   background: #eee;
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
 }
@@ -116,12 +397,48 @@ main {
   display: block;
 }
 
+/* ---- 상품관리 리스트 ---- */
+.product-list-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.reorder-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.reorder-buttons button { padding: 2px 10px; font-size: 11px; }
+.reorder-buttons button:disabled { opacity: 0.25; cursor: default; }
+
+.add-product-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.add-product-form .input-apple { flex: 1; min-width: 240px; }
+
+/* ---- WORK 컨트롤 ---- */
+.work-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
 /* ---- 이미지 라이트박스 ---- */
 .lightbox-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 1000;
   align-items: center;
   justify-content: center;
@@ -133,6 +450,7 @@ main {
   max-width: 90vw;
   max-height: 85vh;
   object-fit: contain;
+  border-radius: 12px;
 }
 
 .lightbox-close {

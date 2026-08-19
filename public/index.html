@@ -1,46 +1,40 @@
 <!doctype html>
-<html lang="ko" data-theme="wireframe">
+<html lang="ko">
 <head>
   <meta charset="utf-8" />
   <title>대시보드 - 무신사 리뷰 모니터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/style.css" />
 </head>
-<body class="bg-base-200 min-h-screen">
-  <div class="navbar bg-base-100 border-b border-base-300 px-4">
-    <div class="flex-1">
-      <span class="text-lg font-semibold">무신사 포토후기 TOP10 모니터</span>
-    </div>
-    <div class="flex-none">
-      <div class="tabs tabs-boxed">
-        <a href="/index.html" class="tab tab-active">대시보드</a>
-        <a href="/history.html" class="tab">변동이력</a>
-        <a href="/work.html" class="tab">WORK</a>
-        <a href="/products.html" class="tab">상품관리</a>
-        <a href="#" id="logoutLink" class="tab">로그아웃</a>
-      </div>
+<body>
+  <div class="apple-nav">
+    <span class="brand">무신사 포토후기 TOP10 모니터</span>
+    <div class="links">
+      <a href="/index.html" class="active">대시보드</a>
+      <a href="/history.html">변동이력</a>
+      <a href="/work.html">WORK</a>
+      <a href="/products.html">상품관리</a>
+      <a href="#" id="logoutLink">로그아웃</a>
     </div>
   </div>
 
   <main>
-    <div id="summaryBar" class="stats stats-vertical sm:stats-horizontal shadow border border-base-300 w-full mb-6"></div>
+    <div id="summaryBar" class="stats-apple"></div>
 
-    <div class="flex justify-between items-center mb-3">
-      <h2 class="font-semibold">최근 순위 변동</h2>
-      <div class="join" id="rangeToggle">
-        <button data-days="1" class="btn btn-sm join-item btn-active">1일</button>
-        <button data-days="3" class="btn btn-sm join-item">3일</button>
-        <button data-days="7" class="btn btn-sm join-item">7일</button>
+    <div class="section-heading">
+      <h2>최근 순위 변동</h2>
+      <div class="segmented" id="rangeToggle">
+        <button data-days="1" class="active">1일</button>
+        <button data-days="3">3일</button>
+        <button data-days="7">7일</button>
       </div>
     </div>
     <div id="recentChanges">불러오는 중...</div>
 
-    <div class="flex justify-between items-center mt-8 mb-3">
+    <div class="section-heading">
       <span class="muted">사진후기만 · 유용한순 정렬 기준 TOP10</span>
-      <button id="checkAllBtn" class="btn btn-primary btn-sm">전체 지금 체크</button>
+      <button id="checkAllBtn" class="btn-apple small">전체 지금 체크</button>
     </div>
     <div id="content">불러오는 중...</div>
   </main>
@@ -72,12 +66,12 @@
       const multiBadge = images.length > 1 ? `<span class="multi-badge">1/${images.length}</span>` : "";
       const rankBadge = rankChangeBadgeHtml(r);
       return `
-        <div class="review-card card card-compact bg-base-100 border border-base-300">
+        <div class="review-card card-apple">
           <button type="button" class="thumb-btn" data-review-no="${r.review_no}">${img}${multiBadge}</button>
-          <div class="body card-body">
-            <div class="font-bold">${r.rank}위 ${rankBadge}</div>
+          <div class="body">
+            <div class="rank">${r.rank}위 ${rankBadge}</div>
             <div>${r.nickname ?? "익명"}</div>
-            <div>${gradeStars(r.grade)} · <a class="link" href="${r.review_url}" target="_blank" rel="noopener">👍 도움돼요 ${r.like_count ?? 0}</a></div>
+            <div>${gradeStars(r.grade)} · <a class="link-apple" href="${r.review_url}" target="_blank" rel="noopener">👍 도움돼요 ${r.like_count ?? 0}</a></div>
             <div class="muted">등록일 ${formatDateOnly(r.review_posted_at)}</div>
             <div class="review-text">${(r.content ?? "").trim() || "(작성된 텍스트 없음)"}</div>
           </div>
@@ -98,17 +92,15 @@
         : `<div class="muted">아직 체크 기록이 없습니다. "지금 체크"를 눌러 첫 스냅샷을 만드세요.</div>`;
 
       return `
-        <div class="product-block card bg-base-100 border border-base-300 mb-5">
-          <div class="card-body">
-            <div class="product-block-header flex justify-between items-center mb-3">
-              <div>
-                <strong>${p.name ?? "상품 " + p.goods_no}</strong>
-                <div class="muted">goodsNo: ${p.goods_no}${capturedAt ? " · 마지막 체크: " + capturedAt : ""}</div>
-              </div>
-              <button class="btn btn-outline btn-sm" data-check-product="${p.id}">지금 체크</button>
+        <div class="product-block card-apple">
+          <div class="product-block-header">
+            <div>
+              <strong>${p.name ?? "상품 " + p.goods_no}</strong>
+              <div class="muted">goodsNo: ${p.goods_no}${capturedAt ? " · 마지막 체크: " + capturedAt : ""}</div>
             </div>
-            ${grid}
+            <button class="btn-apple secondary small" data-check-product="${p.id}">지금 체크</button>
           </div>
+          ${grid}
         </div>`;
     }
 
@@ -118,21 +110,21 @@
         const s = await api("/api/summary");
         const lastChecked = s.lastCheckedAt ? formatDate(s.lastCheckedAt) : "체크 기록 없음";
         bar.innerHTML = `
-          <div class="stat">
-            <div class="stat-title">모니터링 상품</div>
-            <div class="stat-value text-2xl">${s.productCount}</div>
+          <div class="stat-apple">
+            <div class="value">${s.productCount}</div>
+            <div class="label">모니터링 상품</div>
           </div>
-          <div class="stat">
-            <div class="stat-title">최근 24시간 변동</div>
-            <div class="stat-value text-2xl">${s.changesLast24h}</div>
+          <div class="stat-apple">
+            <div class="value">${s.changesLast24h}</div>
+            <div class="label">최근 24시간 변동</div>
           </div>
-          <div class="stat">
-            <div class="stat-title">최근 7일 변동</div>
-            <div class="stat-value text-2xl">${s.changesLast7d}</div>
+          <div class="stat-apple">
+            <div class="value">${s.changesLast7d}</div>
+            <div class="label">최근 7일 변동</div>
           </div>
-          <div class="stat">
-            <div class="stat-title">마지막 체크</div>
-            <div class="stat-value text-base">${lastChecked}</div>
+          <div class="stat-apple">
+            <div class="value small">${lastChecked}</div>
+            <div class="label">마지막 체크</div>
           </div>`;
       } catch (e) {
         bar.innerHTML = "";
@@ -168,15 +160,15 @@
           <td>${thumb}</td>
           <td>${formatDate(c.detected_at)}</td>
           <td>${c.product_name ?? "상품 " + c.goods_no}</td>
-          <td><span class="badge ${badgeClass}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
+          <td><span class="badge-pill ${badgeClass}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
           <td>${rankSummary(c)}</td>
           <td>${c.nickname ?? "익명"}</td>
-          <td><a class="link" href="${c.review_url}" target="_blank" rel="noopener">${likeChangeText(c)}</a></td>
+          <td><a class="link-apple" href="${c.review_url}" target="_blank" rel="noopener">${likeChangeText(c)}</a></td>
         </tr>`;
       }).join("");
       box.innerHTML = `
-        <div class="overflow-x-auto">
-        <table class="table bg-base-100 border border-base-300">
+        <div class="table-wrap">
+        <table class="table-apple">
           <thead><tr><th>사진</th><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>도움돼요</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
@@ -192,8 +184,8 @@
     document.getElementById("rangeToggle").addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-days]");
       if (!btn) return;
-      document.querySelectorAll("#rangeToggle button").forEach((b) => b.classList.remove("btn-active"));
-      btn.classList.add("btn-active");
+      document.querySelectorAll("#rangeToggle button").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
       loadRecentChanges(Number(btn.dataset.days));
     });
 
@@ -201,7 +193,7 @@
       const content = document.getElementById("content");
       const products = await api("/api/products");
       if (products.length === 0) {
-        content.innerHTML = `<div class="muted">등록된 상품이 없습니다. <a href="/products.html">상품관리</a>에서 추가하세요.</div>`;
+        content.innerHTML = `<div class="muted">등록된 상품이 없습니다. <a class="link-apple" href="/products.html">상품관리</a>에서 추가하세요.</div>`;
         return;
       }
       dashboardReviewMap = {};

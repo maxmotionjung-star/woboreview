@@ -1,24 +1,20 @@
 <!doctype html>
-<html lang="ko" data-theme="wireframe">
+<html lang="ko">
 <head>
   <meta charset="utf-8" />
   <title>로그인 - 무신사 리뷰 모니터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="/style.css" />
 </head>
-<body class="min-h-screen bg-base-200">
-  <div class="card w-full max-w-sm mx-auto mt-24 bg-base-100 shadow-xl">
-    <div class="card-body">
-      <h2 class="card-title">무신사 리뷰 모니터</h2>
-      <form id="loginForm" class="flex flex-col gap-3 mt-2">
-        <input type="password" id="password" placeholder="비밀번호" autofocus required class="input input-bordered w-full" />
-        <input type="submit" value="로그인" class="btn btn-primary w-full" />
-      </form>
-      <div class="error-text" id="errorText"></div>
-    </div>
+<body>
+  <div class="card-apple login-card">
+    <h2>무신사 리뷰 모니터</h2>
+    <form id="loginForm" class="flex flex-col gap-3">
+      <input type="password" id="password" placeholder="비밀번호" autofocus required class="input-apple w-full" />
+      <input type="submit" value="로그인" class="btn-apple w-full" />
+    </form>
+    <div class="error-text" id="errorText"></div>
   </div>
 
   <script src="/common.js"></script>
