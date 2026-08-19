@@ -13,12 +13,22 @@ function summaryLine(event: RankChangeEvent): string {
   return `🔻 TOP10 이탈 (이전 ${event.oldRank}위)`;
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/** 대시보드 카드의 "👍 도움돼요 N" 표기·링크와 동일하게 맞춘 캡션 (HTML parse_mode) */
 function buildCaption(productName: string, event: RankChangeEvent): string {
+  const reviewUrl = `https://www.musinsa.com/review/${event.reviewNo}`;
   return [
-    `[${productName}] 포토후기 TOP10 변동`,
+    `[${escapeHtml(productName)}] 포토후기 TOP10 변동`,
     summaryLine(event),
-    `작성자: ${event.nickname}`,
+    `작성자: ${escapeHtml(event.nickname)}`,
     `별점: ${stars(event.grade)}`,
+    `<a href="${reviewUrl}">👍 도움돼요 ${event.likeCount ?? 0}</a>`,
   ].join("\n");
 }
 
@@ -46,9 +56,9 @@ async function sendChangeNotification(productName: string, event: RankChangeEven
   const caption = buildCaption(productName, event);
 
   if (event.imageUrl) {
-    await callTelegramApi("sendPhoto", { photo: event.imageUrl, caption });
+    await callTelegramApi("sendPhoto", { photo: event.imageUrl, caption, parse_mode: "HTML" });
   } else {
-    await callTelegramApi("sendMessage", { text: caption });
+    await callTelegramApi("sendMessage", { text: caption, parse_mode: "HTML" });
   }
 }
 
