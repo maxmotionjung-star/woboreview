@@ -5,11 +5,13 @@ CREATE TABLE IF NOT EXISTS products (
   url TEXT NOT NULL,
   active BOOLEAN NOT NULL DEFAULT TRUE,
   sort_order INTEGER,
+  thumbnail_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- 기존 DB에도 안전하게 적용되도록 별도 ALTER (컬럼이 이미 있으면 무시됨)
 ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INTEGER;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;
 UPDATE products SET sort_order = id WHERE sort_order IS NULL;
 
 -- 매 체크 시점의 TOP10 스냅샷. 다음 체크 때 이전 스냅샷과 비교하는 기준이 된다.

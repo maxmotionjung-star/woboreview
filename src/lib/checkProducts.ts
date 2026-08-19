@@ -56,6 +56,7 @@ async function getLatestSnapshot(productId: number): Promise<TopReview[]> {
     likeCount: r.like_count ?? 0,
     reviewUrl: `https://www.musinsa.com/review/${r.review_no}`,
     postedAt: r.review_posted_at ? r.review_posted_at.toISOString() : null,
+    productThumbnailUrl: null,
   }));
 }
 
@@ -134,6 +135,14 @@ async function checkProduct(product: ProductRow): Promise<RankChangeEvent[]> {
   const current = await fetchTop10PhotoReviews(product.goods_no);
   const previous = await getLatestSnapshot(product.id);
   const capturedAt = new Date();
+
+  const thumbnailUrl = current[0]?.productThumbnailUrl;
+  if (thumbnailUrl) {
+    await pool.query("UPDATE products SET thumbnail_url = $1 WHERE id = $2", [
+      thumbnailUrl,
+      product.id,
+    ]);
+  }
 
   let events: RankChangeEvent[] = [];
 

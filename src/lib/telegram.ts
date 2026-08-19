@@ -20,14 +20,29 @@ function escapeHtml(text: string): string {
     .replace(/>/g, "&gt;");
 }
 
+/** 리뷰 본문을 최대 2줄 정도로 요약한다 (대시보드 카드의 2줄 미리보기와 맞춤). */
+function reviewSnippet(content: string): string {
+  const lines = content.trim().split(/\r?\n/).slice(0, 2).join(" ");
+  const MAX_LEN = 90;
+  return lines.length > MAX_LEN ? `${lines.slice(0, MAX_LEN)}…` : lines;
+}
+
+function formatPostedDate(postedAt: string | null): string {
+  if (!postedAt) return "-";
+  return new Date(postedAt).toLocaleDateString("ko-KR");
+}
+
 /** 대시보드 카드의 "👍 도움돼요 N" 표기·링크와 동일하게 맞춘 캡션 (HTML parse_mode) */
 function buildCaption(productName: string, event: RankChangeEvent): string {
   const reviewUrl = `https://www.musinsa.com/review/${event.reviewNo}`;
+  const snippet = reviewSnippet(event.content);
   return [
     `[${escapeHtml(productName)}] 포토후기 TOP10 변동`,
     summaryLine(event),
     `작성자: ${escapeHtml(event.nickname)}`,
     `별점: ${stars(event.grade)}`,
+    `등록일: ${formatPostedDate(event.postedAt)}`,
+    ...(snippet ? [escapeHtml(snippet)] : []),
     `<a href="${reviewUrl}">👍 도움돼요 ${event.likeCount ?? 0}</a>`,
   ].join("\n");
 }

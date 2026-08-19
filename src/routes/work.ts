@@ -5,7 +5,7 @@ import { asyncHandler } from "../lib/asyncHandler";
 
 export const workRouter = Router();
 
-const ALLOWED_LIMITS = [10, 20, 30];
+const ALLOWED_LIMITS = [10, 20, 30, 50];
 
 workRouter.get(
   "/:id",

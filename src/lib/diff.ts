@@ -10,6 +10,8 @@ export interface RankChangeEvent {
   imageUrl: string | null;
   imageUrls: string[];
   likeCount: number;
+  content: string;
+  postedAt: string | null;
 }
 
 /**
@@ -34,6 +36,8 @@ export function diffTop10(previous: TopReview[], current: TopReview[]): RankChan
         imageUrl: review.imageUrl,
         imageUrls: review.imageUrls,
         likeCount: review.likeCount,
+        content: review.content,
+        postedAt: review.postedAt,
       });
     }
   }
@@ -50,6 +54,8 @@ export function diffTop10(previous: TopReview[], current: TopReview[]): RankChan
         imageUrl: review.imageUrl,
         imageUrls: review.imageUrls,
         likeCount: review.likeCount,
+        content: review.content,
+        postedAt: review.postedAt,
       });
     }
   }

@@ -94,12 +94,19 @@
         ? `<div class="review-grid">${top10.map(reviewCardHtml).join("")}</div>`
         : `<div class="muted">아직 체크 기록이 없습니다. "지금 체크"를 눌러 첫 스냅샷을 만드세요.</div>`;
 
+      const thumb = p.thumbnail_url
+        ? `<img src="${p.thumbnail_url}" alt="상품 썸네일" loading="lazy" />`
+        : `<div class="product-thumb-empty"></div>`;
+
       return `
         <div class="product-block card-apple">
           <div class="product-block-header">
-            <div>
-              <strong>${p.name ?? "상품 " + p.goods_no}</strong>
-              <div class="muted">goodsNo: ${p.goods_no}${capturedAt ? " · 마지막 체크: " + capturedAt : ""}</div>
+            <div class="product-title-group">
+              <a class="product-thumb" href="${p.url}" target="_blank" rel="noopener">${thumb}</a>
+              <div>
+                <strong>${p.name ?? "상품 " + p.goods_no}</strong>
+                <div class="muted">goodsNo: ${p.goods_no}${capturedAt ? " · 마지막 체크: " + capturedAt : ""}</div>
+              </div>
             </div>
             <button class="btn-apple secondary small" data-check-product="${p.id}">지금 체크</button>
           </div>

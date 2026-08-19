@@ -9,7 +9,7 @@ productsRouter.get(
   "/",
   asyncHandler(async (_req, res) => {
     const { rows } = await pool.query(
-      "SELECT id, goods_no, name, url, active, sort_order, created_at FROM products ORDER BY sort_order, id"
+      "SELECT id, goods_no, name, url, active, sort_order, thumbnail_url, created_at FROM products ORDER BY sort_order, id"
     );
     res.json(rows);
   })

@@ -29,9 +29,11 @@
         <button data-limit="10">TOP 10</button>
         <button data-limit="20" class="active">TOP 20</button>
         <button data-limit="30">TOP 30</button>
+        <button data-limit="50">TOP 50</button>
       </div>
       <button class="btn-apple secondary small" id="refreshBtn">새로고침</button>
     </div>
+    <div id="selectedProductInfo"></div>
     <p class="muted mb-4">선택한 상품의 사진후기를 최신순으로 보여줍니다. 각 리뷰가 유용한순 기준 몇 위인지 함께 표시되고, 빨간 테두리로 표시한 리뷰는 기기와 상관없이 계속 저장됩니다. 썸네일을 클릭하면 사진을 크게(여러 장이면 넘겨가며) 볼 수 있고, "👍 도움돼요" 링크를 클릭하면 무신사 리뷰 페이지로 이동해 직접 "도움돼요"를 누를 수 있습니다.</p>
     <div id="content">불러오는 중...</div>
   </main>
@@ -86,7 +88,26 @@
       return products[0].id;
     }
 
+    function renderSelectedProductInfo() {
+      const info = document.getElementById("selectedProductInfo");
+      const productId = document.getElementById("productSelect").value;
+      const p = products.find((x) => String(x.id) === String(productId));
+      if (!p) {
+        info.innerHTML = "";
+        return;
+      }
+      const thumb = p.thumbnail_url
+        ? `<img src="${p.thumbnail_url}" alt="상품 썸네일" loading="lazy" />`
+        : `<div class="product-thumb-empty"></div>`;
+      info.innerHTML = `
+        <div class="product-title-group" style="margin-bottom:16px">
+          <a class="product-thumb" href="${p.url}" target="_blank" rel="noopener">${thumb}</a>
+          <strong>${p.name ?? "상품 " + p.goods_no}</strong>
+        </div>`;
+    }
+
     async function loadWork() {
+      renderSelectedProductInfo();
       const content = document.getElementById("content");
       const productId = document.getElementById("productSelect").value;
       if (!productId) {

@@ -295,6 +295,36 @@ main {
   letter-spacing: -0.374px;
 }
 
+.product-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.product-thumb {
+  display: block;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--color-hairline);
+}
+
+.product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-thumb-empty {
+  width: 100%;
+  height: 100%;
+  background: var(--color-canvas-parchment);
+}
+
 .review-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
