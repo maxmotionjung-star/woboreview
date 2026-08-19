@@ -100,12 +100,23 @@ productsRouter.get(
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     const { rows } = await pool.query(
-      `SELECT review_no, rank, nickname, grade, content, image_url, image_urls, like_count, review_posted_at, captured_at,
-              'https://www.musinsa.com/review/' || review_no AS review_url
-       FROM review_snapshots
-       WHERE product_id = $1
-         AND captured_at = (SELECT MAX(captured_at) FROM review_snapshots WHERE product_id = $1)
-       ORDER BY rank`,
+      `WITH latest AS (
+         SELECT MAX(captured_at) AS ts FROM review_snapshots WHERE product_id = $1
+       ), previous AS (
+         SELECT MAX(captured_at) AS ts FROM review_snapshots
+         WHERE product_id = $1 AND captured_at < (SELECT ts FROM latest)
+       )
+       SELECT cur.review_no, cur.rank, cur.nickname, cur.grade, cur.content, cur.image_url,
+              cur.image_urls, cur.like_count, cur.review_posted_at, cur.captured_at,
+              'https://www.musinsa.com/review/' || cur.review_no AS review_url,
+              prev.rank AS previous_rank
+       FROM review_snapshots cur
+       LEFT JOIN review_snapshots prev
+         ON prev.product_id = cur.product_id
+        AND prev.review_no = cur.review_no
+        AND prev.captured_at = (SELECT ts FROM previous)
+       WHERE cur.product_id = $1 AND cur.captured_at = (SELECT ts FROM latest)
+       ORDER BY cur.rank`,
       [id]
     );
     res.json(rows);

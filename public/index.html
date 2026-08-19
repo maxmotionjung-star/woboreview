@@ -44,16 +44,28 @@
 
     let dashboardReviewMap = {};
 
+    function rankChangeBadgeHtml(r) {
+      if (r.previous_rank == null) {
+        return `<span class="rank-change-badge up">▲ 신규</span>`;
+      }
+      if (r.previous_rank === r.rank) return "";
+      if (r.rank < r.previous_rank) {
+        return `<span class="rank-change-badge up">▲ ${r.previous_rank}→${r.rank}</span>`;
+      }
+      return `<span class="rank-change-badge down">▼ ${r.previous_rank}→${r.rank}</span>`;
+    }
+
     function reviewCardHtml(r) {
       const images = r.image_urls && r.image_urls.length ? r.image_urls : (r.image_url ? [r.image_url] : []);
       dashboardReviewMap[r.review_no] = images;
       const img = images[0]
         ? `<img src="${images[0]}" alt="리뷰 이미지" loading="lazy" />`
         : `<div style="aspect-ratio:1;background:#eee"></div>`;
-      const badge = images.length > 1 ? `<span class="multi-badge">1/${images.length}</span>` : "";
+      const multiBadge = images.length > 1 ? `<span class="multi-badge">1/${images.length}</span>` : "";
+      const rankBadge = rankChangeBadgeHtml(r);
       return `
         <div class="review-card">
-          <button type="button" class="thumb-btn" data-review-no="${r.review_no}">${img}${badge}</button>
+          <button type="button" class="thumb-btn" data-review-no="${r.review_no}">${img}${multiBadge}${rankBadge}</button>
           <div class="body">
             <div class="rank">${r.rank}위</div>
             <div>${r.nickname ?? "익명"}</div>
