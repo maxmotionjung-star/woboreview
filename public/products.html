@@ -5,6 +5,9 @@
   <title>상품관리 - 무신사 리뷰 모니터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -43,14 +46,14 @@
       content.innerHTML = products.map((p, i) => `
         <div class="product-list-item card-apple">
           <div class="reorder-buttons">
-            <button class="btn-apple secondary xs" data-move="up" data-id="${p.id}" ${i === 0 ? "disabled" : ""}>▲</button>
-            <button class="btn-apple secondary xs" data-move="down" data-id="${p.id}" ${i === products.length - 1 ? "disabled" : ""}>▼</button>
+            <button class="btn-apple xs" data-move="up" data-id="${p.id}" ${i === 0 ? "disabled" : ""}>▲</button>
+            <button class="btn-apple xs" data-move="down" data-id="${p.id}" ${i === products.length - 1 ? "disabled" : ""}>▼</button>
           </div>
           <div style="flex:1">
             <strong>${p.name ?? "상품 " + p.goods_no}</strong>
             <div class="muted">${p.url}</div>
           </div>
-          <button class="btn-apple danger small" data-delete="${p.id}">삭제</button>
+          <button class="btn-apple danger" data-delete="${p.id}">삭제</button>
         </div>`).join("");
 
       content.querySelectorAll("[data-delete]").forEach((btn) => {

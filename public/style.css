@@ -1,70 +1,106 @@
-/* Apple Store(apple.com/kr/store) 참고 디자인 시스템.
-   Tailwind CDN은 레이아웃 유틸리티로만 쓰고, 컴포넌트 룩은 여기서 정의한다. */
+/* DESIGN-apple.md 토큰을 그대로 반영한 디자인 시스템.
+   대시보드 성격상 마케팅 사이트의 풀블리드 타일 구조 대신,
+   색상/타이포/버튼/카드/내비게이션 등 컴포넌트 토큰만 그대로 적용한다. */
 
 :root {
-  --apple-blue: #0071e3;
-  --apple-blue-hover: #0077ed;
-  --apple-blue-active: #006edb;
-  --apple-bg: #f5f5f7;
-  --apple-surface: #ffffff;
-  --apple-text: #1d1d1f;
-  --apple-muted: #86868b;
-  --apple-border: rgba(0, 0, 0, 0.08);
-  --apple-danger: #ff3b30;
-  --apple-success: #1db954;
+  /* colors */
+  --color-primary: #0066cc;
+  --color-primary-focus: #0071e3;
+  --color-primary-on-dark: #2997ff;
+  --color-ink: #1d1d1f;
+  --color-body-on-dark: #ffffff;
+  --color-body-muted: #cccccc;
+  --color-ink-muted-80: #333333;
+  --color-ink-muted-48: #7a7a7a;
+  --color-divider-soft: rgba(0, 0, 0, 0.08);
+  --color-hairline: #e0e0e0;
+  --color-canvas: #ffffff;
+  --color-canvas-parchment: #f5f5f7;
+  --color-surface-pearl: #fafafc;
+  --color-surface-black: #000000;
+  --color-on-primary: #ffffff;
+
+  /* 시스템의 유일한 그림자: 상품(리뷰) 이미지 전용 */
+  --product-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
+
+  /* radius */
+  --radius-xs: 5px;
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
+
+  /* spacing */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 17px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "SF Pro Text", "Malgun Gothic", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: var(--apple-bg);
-  color: var(--apple-text);
+  background: var(--color-canvas-parchment);
+  color: var(--color-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Malgun Gothic", "Helvetica Neue", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 main {
-  max-width: 1000px;
+  max-width: 1040px;
   margin: 0 auto;
-  padding: 32px 22px 60px;
+  padding: var(--space-xl) var(--space-lg) 80px;
 }
 
-.muted { color: var(--apple-muted); font-size: 13px; }
-.error-text { color: var(--apple-danger); font-size: 13px; margin-top: 10px; }
+/* ---- 타이포그래피 토큰 ---- */
+.type-tagline { font-size: 21px; font-weight: 600; line-height: 1.19; letter-spacing: 0.231px; }
+.type-body-strong { font-size: 17px; font-weight: 600; line-height: 1.24; letter-spacing: -0.374px; }
+.type-body { font-size: 17px; font-weight: 400; line-height: 1.47; letter-spacing: -0.374px; }
+.type-caption { font-size: 14px; font-weight: 400; line-height: 1.43; letter-spacing: -0.224px; }
+.type-caption-strong { font-size: 14px; font-weight: 600; line-height: 1.29; letter-spacing: -0.224px; }
+.type-fine-print { font-size: 12px; font-weight: 400; line-height: 1.3; letter-spacing: -0.12px; color: var(--color-ink-muted-48); }
+.type-nav-link { font-size: 12px; font-weight: 400; line-height: 1; letter-spacing: -0.12px; }
 
-/* ---- 상단 내비게이션 ---- */
+.muted { color: var(--color-ink-muted-48); font-size: 13px; }
+.error-text { color: #ff3b30; font-size: 13px; margin-top: 10px; }
+
+/* ---- global-nav: 순수 블랙, 44px, nav-link 타이포 ---- */
 .apple-nav {
   position: sticky;
   top: 0;
   z-index: 50;
-  height: 52px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 22px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--apple-border);
+  padding: 0 var(--space-lg);
+  background: var(--color-surface-black);
+  color: var(--color-body-on-dark);
 }
 
 .apple-nav .brand {
+  font-size: 14px;
   font-weight: 600;
-  font-size: 15px;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.224px;
+  color: var(--color-body-on-dark);
   white-space: nowrap;
 }
 
 .apple-nav .links {
   display: flex;
-  gap: 22px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
 .apple-nav .links a {
-  font-size: 13px;
-  color: var(--apple-text);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.12px;
+  color: var(--color-body-on-dark);
   text-decoration: none;
   opacity: 0.72;
   white-space: nowrap;
@@ -73,101 +109,117 @@ main {
 .apple-nav .links a:hover { opacity: 1; }
 .apple-nav .links a.active { opacity: 1; font-weight: 600; }
 
-/* ---- 버튼 ---- */
+/* ---- button-primary: pill, Action Blue, 11px 22px, body 타이포 ---- */
 .btn-apple {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border-radius: 980px;
-  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  padding: 11px 22px;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.374px;
+  border: none;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  transition: transform 0.1s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.btn-apple:active { transform: scale(0.95); }
+.btn-apple:focus-visible { outline: 2px solid var(--color-primary-focus); outline-offset: 2px; }
+
+/* button-secondary-pill: ghost pill */
+.btn-apple.secondary {
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
+
+/* button-dark-utility */
+.btn-apple.danger {
+  background: #ff3b30;
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 8px 15px;
   font-size: 14px;
   font-weight: 400;
-  border: 1px solid transparent;
-  cursor: pointer;
-  background: var(--apple-blue);
+  letter-spacing: -0.224px;
+}
+
+.btn-apple.small { padding: 8px 15px; font-size: 14px; letter-spacing: -0.224px; }
+.btn-apple.xs {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-ink);
   color: #fff;
-  transition: background 0.15s ease;
-  white-space: nowrap;
 }
 
-.btn-apple:hover { background: var(--apple-blue-hover); }
-.btn-apple:active { background: var(--apple-blue-active); }
+.btn-apple:disabled { opacity: 0.35; cursor: default; }
 
-.btn-apple.secondary {
-  background: #fff;
-  color: var(--apple-text);
-  border-color: var(--apple-border);
-}
-.btn-apple.secondary:hover { background: #f5f5f7; }
-
-.btn-apple.danger { background: var(--apple-danger); }
-.btn-apple.danger:hover { background: #e0352b; }
-
-.btn-apple.small { padding: 6px 14px; font-size: 13px; }
-.btn-apple.xs { padding: 3px 10px; font-size: 12px; border-radius: 980px; }
-
-.btn-apple:disabled { opacity: 0.4; cursor: default; }
-
-/* ---- 입력창 ---- */
+/* ---- search-input: pill, hairline border, body 타이포 ---- */
 .input-apple, select.input-apple {
-  border: 1px solid var(--apple-border);
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-size: 14px;
-  background: #fff;
-  color: var(--apple-text);
+  border: 1px solid var(--color-divider-soft);
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  height: 44px;
+  font-size: 15px;
+  letter-spacing: -0.224px;
+  background: var(--color-canvas);
+  color: var(--color-ink);
   font-family: inherit;
 }
 
 .input-apple:focus {
-  outline: 2px solid var(--apple-blue);
+  outline: 2px solid var(--color-primary-focus);
   outline-offset: 1px;
 }
 
-/* ---- 세그먼트 토글 (1일/3일/7일, TOP10/20/30) ---- */
+/* ---- configurator-option-chip: 세그먼트 토글 ---- */
 .segmented {
   display: inline-flex;
-  background: #e8e8ed;
-  border-radius: 980px;
-  padding: 2px;
-  gap: 2px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .segmented button {
-  border: none;
-  background: transparent;
+  border: 1px solid var(--color-divider-soft);
+  background: var(--color-canvas);
   cursor: pointer;
-  padding: 6px 16px;
-  font-size: 13px;
-  border-radius: 980px;
-  color: var(--apple-text);
-  transition: background 0.15s ease;
+  padding: 8px 16px;
+  font-size: 14px;
+  letter-spacing: -0.224px;
+  border-radius: var(--radius-pill);
+  color: var(--color-ink);
+  font-family: inherit;
 }
 
 .segmented button.active {
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  border: 2px solid var(--color-primary-focus);
   font-weight: 600;
 }
 
-/* ---- 카드 ---- */
+/* ---- store-utility-card: 흰 배경, hairline 테두리, 18px, 그림자 없음 ---- */
 .card-apple {
-  background: var(--apple-surface);
-  border-radius: 18px;
-  border: 1px solid var(--apple-border);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  background: var(--color-canvas);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-hairline);
 }
 
 .login-card {
   max-width: 360px;
   margin: 100px auto 0;
-  padding: 32px;
+  padding: var(--space-lg);
 }
 
 .login-card h2 {
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 600;
+  letter-spacing: 0.231px;
   margin: 0 0 18px;
 }
 
@@ -176,65 +228,72 @@ main {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1px;
-  background: var(--apple-border);
-  border-radius: 18px;
+  background: var(--color-hairline);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--apple-border);
-  margin-bottom: 32px;
+  border: 1px solid var(--color-hairline);
+  margin-bottom: var(--space-xl);
 }
 
 .stat-apple {
-  background: var(--apple-surface);
+  background: var(--color-canvas);
   text-align: center;
-  padding: 20px 12px;
+  padding: var(--space-lg) var(--space-sm);
 }
 
 .stat-apple .value {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.28px;
 }
 
-.stat-apple .value.small { font-size: 15px; }
+.stat-apple .value.small { font-size: 15px; letter-spacing: -0.224px; }
 
 .stat-apple .label {
   font-size: 12px;
-  color: var(--apple-muted);
+  color: var(--color-ink-muted-48);
+  letter-spacing: -0.12px;
   margin-top: 4px;
 }
 
-/* ---- 섹션 헤딩 ---- */
+/* ---- 섹션 헤딩 (tagline 타이포) ---- */
 .section-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 40px 0 14px;
+  margin: var(--space-xl) 0 14px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .section-heading:first-child { margin-top: 0; }
 
 .section-heading h2 {
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.231px;
   margin: 0;
 }
 
 /* ---- 상품 블록 / 리뷰 카드 ---- */
 .product-block {
-  margin-bottom: 24px;
-  padding: 22px;
+  margin-bottom: var(--space-lg);
+  padding: var(--space-lg);
 }
 
 .product-block-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-md);
   gap: 12px;
 }
 
-.product-block-header strong { font-size: 16px; }
+.product-block-header strong {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.374px;
+}
 
 .review-grid {
   display: grid;
@@ -242,9 +301,7 @@ main {
   gap: 14px;
 }
 
-.review-card {
-  overflow: hidden;
-}
+.review-card { overflow: hidden; }
 
 .review-card img {
   width: 100%;
@@ -252,32 +309,36 @@ main {
   object-fit: cover;
   display: block;
   background: #eee;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--product-shadow);
 }
 
 .review-card .body {
-  padding: 12px;
+  padding: var(--space-sm);
   font-size: 12px;
 }
 
 .review-card .rank {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
+  letter-spacing: -0.224px;
 }
 
 .review-card .review-text {
   margin-top: 6px;
-  color: var(--apple-muted);
+  color: var(--color-ink-muted-48);
+  font-size: 12px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.4;
+  line-height: 1.43;
 }
 
-.review-card .useful-rank { margin-top: 4px; font-weight: 600; }
+.review-card .useful-rank { margin-top: 4px; font-weight: 600; font-size: 13px; }
 
 .review-card.flagged {
-  outline: 2px solid var(--apple-danger);
+  outline: 2px solid #ff3b30;
   outline-offset: -1px;
 }
 
@@ -295,28 +356,30 @@ main {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(0, 0, 0, 0.55);
-  color: white;
-  font-size: 11px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  backdrop-filter: blur(4px);
-}
-
-/* 순위 등락 배지: 상승=빨강, 하락=초록으로 테마와 무관하게 고정 */
-.rank-change-badge {
-  display: inline-block;
+  background: rgba(210, 210, 215, 0.64);
+  backdrop-filter: blur(6px);
+  color: var(--color-ink);
   font-size: 11px;
   font-weight: 600;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
+}
+
+/* 순위 등락 배지: 상승=빨강, 하락=초록으로 고정 (iOS 시스템 색상) */
+.rank-change-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
   color: white;
   white-space: nowrap;
   vertical-align: middle;
+  letter-spacing: -0.224px;
 }
 
-.rank-change-badge.up { background: var(--apple-danger); }
-.rank-change-badge.down { background: var(--apple-success); }
+.rank-change-badge.up { background: #ff3b30; }
+.rank-change-badge.down { background: #34c759; }
 
 .flag-toggle {
   display: flex;
@@ -325,12 +388,13 @@ main {
   margin-top: 10px;
   font-size: 12px;
   cursor: pointer;
-  color: var(--apple-muted);
+  color: var(--color-ink-muted-48);
 }
 
 .link-apple {
-  color: var(--apple-blue);
+  color: var(--color-primary);
   text-decoration: none;
+  font-size: inherit;
 }
 .link-apple:hover { text-decoration: underline; }
 
@@ -338,40 +402,39 @@ main {
 .badge-pill {
   display: inline-block;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 600;
+  letter-spacing: -0.12px;
   color: white;
 }
-.badge-entered { background: var(--apple-success); }
-.badge-dropped { background: var(--apple-danger); }
+.badge-entered { background: #34c759; }
+.badge-dropped { background: #ff3b30; }
 
 /* ---- 표 ---- */
 .table-wrap {
   overflow-x: auto;
-  border-radius: 18px;
-  border: 1px solid var(--apple-border);
-  background: var(--apple-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-hairline);
+  background: var(--color-canvas);
 }
 
-.table-apple {
-  width: 100%;
-  border-collapse: collapse;
-}
+.table-apple { width: 100%; border-collapse: collapse; }
 
 .table-apple th {
   text-align: left;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--apple-muted);
+  letter-spacing: -0.224px;
+  color: var(--color-ink-muted-48);
   padding: 12px 14px;
-  border-bottom: 1px solid var(--apple-border);
+  border-bottom: 1px solid var(--color-hairline);
   white-space: nowrap;
 }
 
 .table-apple td {
   padding: 12px 14px;
-  border-bottom: 1px solid var(--apple-border);
+  border-bottom: 1px solid var(--color-hairline);
   font-size: 13px;
   vertical-align: middle;
 }
@@ -385,9 +448,10 @@ main {
   padding: 0;
   border: none;
   background: #eee;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   cursor: pointer;
+  box-shadow: var(--product-shadow);
 }
 
 .row-thumb-btn img {
@@ -402,7 +466,7 @@ main {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 16px;
+  padding: var(--space-md) var(--space-lg);
   margin-bottom: 10px;
 }
 
@@ -412,13 +476,12 @@ main {
   gap: 3px;
 }
 
-.reorder-buttons button { padding: 2px 10px; font-size: 11px; }
-.reorder-buttons button:disabled { opacity: 0.25; cursor: default; }
+.reorder-buttons button:disabled { opacity: 0.3; cursor: default; }
 
 .add-product-form {
   display: flex;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: var(--space-lg);
   flex-wrap: wrap;
 }
 
@@ -429,7 +492,7 @@ main {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-md);
   flex-wrap: wrap;
 }
 
@@ -450,7 +513,7 @@ main {
   max-width: 90vw;
   max-height: 85vh;
   object-fit: contain;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 
 .lightbox-close {
