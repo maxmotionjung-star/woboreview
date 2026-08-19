@@ -43,6 +43,7 @@ workRouter.get(
       grade: r.grade,
       content: r.content,
       imageUrl: r.imageUrl,
+      imageUrls: r.imageUrls,
       likeCount: r.likeCount,
       reviewUrl: r.reviewUrl,
       postedAt: r.postedAt,

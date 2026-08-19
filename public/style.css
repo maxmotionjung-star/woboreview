@@ -127,6 +127,27 @@ input[type="text"], input[type="password"], input[type="url"] {
 
 .review-card a { display: block; }
 
+.thumb-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.thumb-btn .multi-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
 .review-card img {
   width: 100%;
   aspect-ratio: 1;
@@ -321,3 +342,85 @@ th { background: var(--bg); }
 .add-product-form input { flex: 1; }
 
 .error-text { color: var(--danger); font-size: 13px; margin-top: 8px; }
+
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-overlay.open { display: flex; }
+
+.lightbox-image {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  font-size: 28px;
+  line-height: 1;
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.lightbox-prev, .lightbox-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 36px;
+  line-height: 1;
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 10px 16px;
+}
+
+.lightbox-prev { left: 8px; }
+.lightbox-next { right: 8px; }
+
+.lightbox-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 13px;
+}
+
+.row-thumb-btn {
+  display: block;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.row-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.helpful-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.helpful-link:hover { text-decoration: underline; }

@@ -5,6 +5,7 @@ export interface TopReview {
   grade: string | null;
   content: string;
   imageUrl: string | null;
+  imageUrls: string[];
   likeCount: number;
   reviewUrl: string;
   postedAt: string | null;
@@ -71,16 +72,20 @@ async function fetchReviewPage(
   const body = (await res.json()) as MusinsaReviewListResponse;
   const list = body.data?.list ?? [];
 
-  return list.map((item) => ({
-    reviewNo: item.no,
-    nickname: item.userProfileInfo?.userNickName ?? "익명",
-    grade: item.grade ?? null,
-    content: item.content ?? "",
-    imageUrl: item.images?.[0]?.imageUrl ? `${IMAGE_CDN_BASE}${item.images[0].imageUrl}` : null,
-    likeCount: item.likeCount ?? 0,
-    reviewUrl: `https://www.musinsa.com/review/${item.no}`,
-    postedAt: item.createDate ?? null,
-  }));
+  return list.map((item) => {
+    const imageUrls = (item.images ?? []).map((im) => `${IMAGE_CDN_BASE}${im.imageUrl}`);
+    return {
+      reviewNo: item.no,
+      nickname: item.userProfileInfo?.userNickName ?? "익명",
+      grade: item.grade ?? null,
+      content: item.content ?? "",
+      imageUrl: imageUrls[0] ?? null,
+      imageUrls,
+      likeCount: item.likeCount ?? 0,
+      reviewUrl: `https://www.musinsa.com/review/${item.no}`,
+      postedAt: item.createDate ?? null,
+    };
+  });
 }
 
 /** pageSize 20 제한을 넘는 개수를 요청하면 여러 페이지로 나눠 이어붙인다. */

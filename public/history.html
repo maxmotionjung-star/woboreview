@@ -34,6 +34,8 @@
       return `TOP10 이탈 (이전 ${c.old_rank}위)`;
     }
 
+    let historyReviewMap = {};
+
     async function loadHistory() {
       const content = document.getElementById("content");
       const changes = await api("/api/changes?days=30");
@@ -42,24 +44,38 @@
         return;
       }
 
-      const rows = changes.map((c) => `
+      historyReviewMap = {};
+      const rows = changes.map((c) => {
+        historyReviewMap[c.id] = c.image_urls || [];
+        const thumb = c.image_urls && c.image_urls[0]
+          ? `<button type="button" class="row-thumb-btn" data-change-id="${c.id}"><img src="${c.image_urls[0]}" alt="리뷰 이미지" loading="lazy" /></button>`
+          : `<div class="muted">-</div>`;
+        return `
         <tr>
+          <td>${thumb}</td>
           <td>${formatDate(c.detected_at)}</td>
           <td>${c.product_name ?? "상품 " + c.goods_no}</td>
           <td><span class="badge ${c.change_type}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
           <td>${rankSummary(c)}</td>
           <td>${c.nickname ?? "익명"}</td>
           <td>${gradeStars(c.grade)}</td>
-          <td>${likeChangeText(c)}</td>
-        </tr>`).join("");
+          <td><a class="helpful-link" href="${c.review_url}" target="_blank" rel="noopener">${likeChangeText(c)}</a></td>
+        </tr>`;
+      }).join("");
 
       content.innerHTML = `
         <table>
           <thead>
-            <tr><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>별점</th><th>좋아요</th></tr>
+            <tr><th>사진</th><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>별점</th><th>도움돼요</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>`;
+
+      content.querySelectorAll("[data-change-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          openLightbox(historyReviewMap[btn.dataset.changeId] || [], 0);
+        });
+      });
     }
 
     requireAuthOrRedirect().then(loadHistory);

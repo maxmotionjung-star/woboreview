@@ -100,7 +100,7 @@ productsRouter.get(
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     const { rows } = await pool.query(
-      `SELECT review_no, rank, nickname, grade, content, image_url, like_count, review_posted_at, captured_at,
+      `SELECT review_no, rank, nickname, grade, content, image_url, image_urls, like_count, review_posted_at, captured_at,
               'https://www.musinsa.com/review/' || review_no AS review_url
        FROM review_snapshots
        WHERE product_id = $1

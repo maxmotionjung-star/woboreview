@@ -15,6 +15,8 @@ changesRouter.get(
               rc.review_no, rc.change_type, rc.old_rank, rc.new_rank,
               rc.nickname, rc.grade, rc.like_count AS like_count_at_event,
               rs.like_count AS like_count_now,
+              COALESCE(rc.image_urls, rs.image_urls) AS image_urls,
+              'https://www.musinsa.com/review/' || rc.review_no AS review_url,
               rc.detected_at
        FROM rank_changes rc
        JOIN products p ON p.id = rc.product_id

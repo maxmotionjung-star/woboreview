@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS review_snapshots (
   grade TEXT,
   content TEXT,
   image_url TEXT,
+  image_urls TEXT[],
   like_count INTEGER,
   review_posted_at TIMESTAMPTZ,
   captured_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -30,6 +31,7 @@ CREATE TABLE IF NOT EXISTS review_snapshots (
 -- 기존 DB에도 안전하게 적용되도록 별도 ALTER (컬럼이 이미 있으면 무시됨)
 ALTER TABLE review_snapshots ADD COLUMN IF NOT EXISTS like_count INTEGER;
 ALTER TABLE review_snapshots ADD COLUMN IF NOT EXISTS review_posted_at TIMESTAMPTZ;
+ALTER TABLE review_snapshots ADD COLUMN IF NOT EXISTS image_urls TEXT[];
 
 CREATE INDEX IF NOT EXISTS idx_review_snapshots_product_captured
   ON review_snapshots (product_id, captured_at DESC);
@@ -45,12 +47,14 @@ CREATE TABLE IF NOT EXISTS rank_changes (
   nickname TEXT,
   grade TEXT,
   image_url TEXT,
+  image_urls TEXT[],
   like_count INTEGER,
   detected_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- 기존 DB에도 안전하게 적용되도록 별도 ALTER (컬럼이 이미 있으면 무시됨)
 ALTER TABLE rank_changes ADD COLUMN IF NOT EXISTS like_count INTEGER;
+ALTER TABLE rank_changes ADD COLUMN IF NOT EXISTS image_urls TEXT[];
 
 CREATE INDEX IF NOT EXISTS idx_rank_changes_product_detected
   ON rank_changes (product_id, detected_at DESC);

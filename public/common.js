@@ -55,3 +55,69 @@ function likeChangeText(change) {
   const sign = delta > 0 ? "+" : "";
   return `👍 ${now} (${sign}${delta})`;
 }
+
+// ---- 이미지 라이트박스 (여러 장 넘겨보기) ----
+let lightboxImages = [];
+let lightboxIndex = 0;
+
+function ensureLightbox() {
+  let overlay = document.getElementById("lightboxOverlay");
+  if (overlay) return overlay;
+
+  overlay = document.createElement("div");
+  overlay.id = "lightboxOverlay";
+  overlay.className = "lightbox-overlay";
+  overlay.innerHTML = `
+    <button type="button" class="lightbox-close" aria-label="닫기">×</button>
+    <button type="button" class="lightbox-prev" aria-label="이전">‹</button>
+    <img class="lightbox-image" alt="리뷰 이미지 크게 보기" />
+    <button type="button" class="lightbox-next" aria-label="다음">›</button>
+    <div class="lightbox-counter"></div>`;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeLightbox();
+  });
+  overlay.querySelector(".lightbox-close").addEventListener("click", closeLightbox);
+  overlay.querySelector(".lightbox-prev").addEventListener("click", () => stepLightbox(-1));
+  overlay.querySelector(".lightbox-next").addEventListener("click", () => stepLightbox(1));
+  document.addEventListener("keydown", (e) => {
+    if (!overlay.classList.contains("open")) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") stepLightbox(-1);
+    if (e.key === "ArrowRight") stepLightbox(1);
+  });
+
+  return overlay;
+}
+
+function renderLightbox() {
+  const overlay = document.getElementById("lightboxOverlay");
+  overlay.querySelector(".lightbox-image").src = lightboxImages[lightboxIndex];
+  const hasMultiple = lightboxImages.length > 1;
+  overlay.querySelector(".lightbox-prev").style.display = hasMultiple ? "" : "none";
+  overlay.querySelector(".lightbox-next").style.display = hasMultiple ? "" : "none";
+  overlay.querySelector(".lightbox-counter").textContent = hasMultiple
+    ? `${lightboxIndex + 1} / ${lightboxImages.length}`
+    : "";
+}
+
+function stepLightbox(delta) {
+  lightboxIndex = (lightboxIndex + delta + lightboxImages.length) % lightboxImages.length;
+  renderLightbox();
+}
+
+function openLightbox(images, startIndex) {
+  const imgs = (images || []).filter(Boolean);
+  if (imgs.length === 0) return;
+  lightboxImages = imgs;
+  lightboxIndex = startIndex || 0;
+  ensureLightbox();
+  renderLightbox();
+  document.getElementById("lightboxOverlay").classList.add("open");
+}
+
+function closeLightbox() {
+  const overlay = document.getElementById("lightboxOverlay");
+  if (overlay) overlay.classList.remove("open");
+}

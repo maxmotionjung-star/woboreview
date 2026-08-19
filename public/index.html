@@ -42,17 +42,22 @@
   <script>
     document.getElementById("logoutLink").addEventListener("click", (e) => { e.preventDefault(); logout(); });
 
+    let dashboardReviewMap = {};
+
     function reviewCardHtml(r) {
-      const img = r.image_url
-        ? `<img src="${r.image_url}" alt="리뷰 이미지" loading="lazy" />`
+      const images = r.image_urls && r.image_urls.length ? r.image_urls : (r.image_url ? [r.image_url] : []);
+      dashboardReviewMap[r.review_no] = images;
+      const img = images[0]
+        ? `<img src="${images[0]}" alt="리뷰 이미지" loading="lazy" />`
         : `<div style="aspect-ratio:1;background:#eee"></div>`;
+      const badge = images.length > 1 ? `<span class="multi-badge">1/${images.length}</span>` : "";
       return `
         <div class="review-card">
-          <a href="${r.review_url}" target="_blank" rel="noopener">${img}</a>
+          <button type="button" class="thumb-btn" data-review-no="${r.review_no}">${img}${badge}</button>
           <div class="body">
             <div class="rank">${r.rank}위</div>
             <div>${r.nickname ?? "익명"}</div>
-            <div>${gradeStars(r.grade)} · 👍 ${r.like_count ?? 0}</div>
+            <div>${gradeStars(r.grade)} · <a class="helpful-link" href="${r.review_url}" target="_blank" rel="noopener">👍 도움돼요 ${r.like_count ?? 0}</a></div>
             <div class="muted">등록일 ${formatDateOnly(r.review_posted_at)}</div>
             <div class="review-text">${(r.content ?? "").trim() || "(작성된 텍스트 없음)"}</div>
           </div>
@@ -119,6 +124,8 @@
       return `TOP10 이탈 (이전 ${c.old_rank}위)`;
     }
 
+    let changesReviewMap = {};
+
     async function loadRecentChanges(days) {
       const box = document.getElementById("recentChanges");
       box.innerHTML = "불러오는 중...";
@@ -127,20 +134,34 @@
         box.innerHTML = `<div class="muted">선택한 기간 동안 변동 이력이 없습니다.</div>`;
         return;
       }
-      const rows = changes.map((c) => `
+      changesReviewMap = {};
+      const rows = changes.map((c) => {
+        changesReviewMap[c.id] = c.image_urls || [];
+        const thumb = c.image_urls && c.image_urls[0]
+          ? `<button type="button" class="row-thumb-btn" data-change-id="${c.id}"><img src="${c.image_urls[0]}" alt="리뷰 이미지" loading="lazy" /></button>`
+          : `<div class="muted">-</div>`;
+        return `
         <tr>
+          <td>${thumb}</td>
           <td>${formatDate(c.detected_at)}</td>
           <td>${c.product_name ?? "상품 " + c.goods_no}</td>
           <td><span class="badge ${c.change_type}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
           <td>${rankSummary(c)}</td>
           <td>${c.nickname ?? "익명"}</td>
-          <td>${likeChangeText(c)}</td>
-        </tr>`).join("");
+          <td><a class="helpful-link" href="${c.review_url}" target="_blank" rel="noopener">${likeChangeText(c)}</a></td>
+        </tr>`;
+      }).join("");
       box.innerHTML = `
         <table>
-          <thead><tr><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>좋아요</th></tr></thead>
+          <thead><tr><th>사진</th><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>도움돼요</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>`;
+
+      box.querySelectorAll("[data-change-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          openLightbox(changesReviewMap[btn.dataset.changeId] || [], 0);
+        });
+      });
     }
 
     document.getElementById("rangeToggle").addEventListener("click", (e) => {
@@ -158,8 +179,15 @@
         content.innerHTML = `<div class="muted">등록된 상품이 없습니다. <a href="/products.html">상품관리</a>에서 추가하세요.</div>`;
         return;
       }
+      dashboardReviewMap = {};
       const blocks = await Promise.all(products.filter((p) => p.active).map(renderProduct));
       content.innerHTML = blocks.join("");
+
+      content.querySelectorAll("[data-review-no]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          openLightbox(dashboardReviewMap[btn.dataset.reviewNo] || [], 0);
+        });
+      });
 
       content.querySelectorAll("[data-check-product]").forEach((btn) => {
         btn.addEventListener("click", async () => {
