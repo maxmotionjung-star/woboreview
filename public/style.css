@@ -46,7 +46,7 @@ body {
   margin: 0;
   background: var(--color-canvas-parchment);
   color: var(--color-ink);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Malgun Gothic", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Google Sans", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Malgun Gothic", "Helvetica Neue", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
