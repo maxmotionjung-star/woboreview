@@ -65,9 +65,9 @@
       const rankBadge = rankChangeBadgeHtml(r);
       return `
         <div class="review-card">
-          <button type="button" class="thumb-btn" data-review-no="${r.review_no}">${img}${multiBadge}${rankBadge}</button>
+          <button type="button" class="thumb-btn" data-review-no="${r.review_no}">${img}${multiBadge}</button>
           <div class="body">
-            <div class="rank">${r.rank}위</div>
+            <div class="rank">${r.rank}위 ${rankBadge}</div>
             <div>${r.nickname ?? "익명"}</div>
             <div>${gradeStars(r.grade)} · <a class="helpful-link" href="${r.review_url}" target="_blank" rel="noopener">👍 도움돼요 ${r.like_count ?? 0}</a></div>
             <div class="muted">등록일 ${formatDateOnly(r.review_posted_at)}</div>
