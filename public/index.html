@@ -45,14 +45,15 @@
     let dashboardReviewMap = {};
 
     function rankChangeBadgeHtml(r) {
+      const title = "최근 7일 대비 순위 변동";
       if (r.previous_rank == null) {
-        return `<span class="rank-change-badge up">▲ 신규</span>`;
+        return `<span class="rank-change-badge up" title="${title}">▲ 신규</span>`;
       }
       if (r.previous_rank === r.rank) return "";
       if (r.rank < r.previous_rank) {
-        return `<span class="rank-change-badge up">▲ ${r.previous_rank}→${r.rank}</span>`;
+        return `<span class="rank-change-badge up" title="${title}">▲ ${r.previous_rank}→${r.rank}</span>`;
       }
-      return `<span class="rank-change-badge down">▼ ${r.previous_rank}→${r.rank}</span>`;
+      return `<span class="rank-change-badge down" title="${title}">▼ ${r.previous_rank}→${r.rank}</span>`;
     }
 
     function reviewCardHtml(r) {

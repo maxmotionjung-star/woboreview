@@ -102,8 +102,9 @@ productsRouter.get(
     const { rows } = await pool.query(
       `WITH latest AS (
          SELECT MAX(captured_at) AS ts FROM review_snapshots WHERE product_id = $1
-       ), previous AS (
-         SELECT MAX(captured_at) AS ts FROM review_snapshots
+       ), baseline AS (
+         -- 최근 7일치만 보관하므로, 가장 오래된 남은 스냅샷이 곧 "7일 전 기준"에 해당한다.
+         SELECT MIN(captured_at) AS ts FROM review_snapshots
          WHERE product_id = $1 AND captured_at < (SELECT ts FROM latest)
        )
        SELECT cur.review_no, cur.rank, cur.nickname, cur.grade, cur.content, cur.image_url,
@@ -114,7 +115,7 @@ productsRouter.get(
        LEFT JOIN review_snapshots prev
          ON prev.product_id = cur.product_id
         AND prev.review_no = cur.review_no
-        AND prev.captured_at = (SELECT ts FROM previous)
+        AND prev.captured_at = (SELECT ts FROM baseline)
        WHERE cur.product_id = $1 AND cur.captured_at = (SELECT ts FROM latest)
        ORDER BY cur.rank`,
       [id]

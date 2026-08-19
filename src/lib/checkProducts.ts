@@ -88,19 +88,10 @@ async function saveSnapshot(productId: number, reviews: TopReview[], capturedAt:
     values
   );
 
-  // diff 계산에는 최신 스냅샷만 있으면 되지만, 대시보드의 순위 등락 표시를 위해
-  // 직전 스냅샷 1개는 남겨두고 그보다 오래된 것만 정리한다.
+  // diff 계산에는 최신 스냅샷만 있으면 되지만, 대시보드의 "최근 7일 기준" 순위 등락 표시를 위해
+  // 최근 7일치 스냅샷은 남겨두고 그보다 오래된 것만 정리한다.
   await pool.query(
-    `DELETE FROM review_snapshots
-     WHERE product_id = $1
-       AND captured_at < (
-         SELECT MIN(captured_at) FROM (
-           SELECT DISTINCT captured_at FROM review_snapshots
-           WHERE product_id = $1
-           ORDER BY captured_at DESC
-           LIMIT 2
-         ) recent
-       )`,
+    "DELETE FROM review_snapshots WHERE product_id = $1 AND captured_at < now() - interval '7 days'",
     [productId]
   );
 }
