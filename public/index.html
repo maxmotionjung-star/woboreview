@@ -28,8 +28,8 @@
     <div class="section-heading">
       <h2>최근 순위 변동</h2>
       <div class="segmented" id="rangeToggle">
-        <button data-days="1" class="active">1일</button>
-        <button data-days="3">3일</button>
+        <button data-days="1">1일</button>
+        <button data-days="3" class="active">3일</button>
         <button data-days="7">7일</button>
       </div>
     </div>
@@ -253,7 +253,7 @@
     requireAuthOrRedirect().then(() => {
       loadSummary();
       loadDashboard();
-      loadRecentChanges(1);
+      loadRecentChanges(3);
     });
   </script>
 </body>

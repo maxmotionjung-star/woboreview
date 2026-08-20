@@ -5,6 +5,8 @@ import {
   fetchUsefulPhotoReviews,
   fetchUsefulRankMap,
   fetchLatestRankMap,
+  fetchLowRatedReviews,
+  type TopReview,
 } from "../lib/musinsa";
 import { asyncHandler } from "../lib/asyncHandler";
 
@@ -12,13 +14,19 @@ export const workRouter = Router();
 
 const ALLOWED_LIMITS = [10, 20, 30, 50];
 
+function parseSort(value: unknown): "new" | "useful" | "rating_low" {
+  if (value === "useful") return "useful";
+  if (value === "rating_low") return "rating_low";
+  return "new";
+}
+
 workRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     const requestedLimit = Number(req.query.limit);
     const limit = ALLOWED_LIMITS.includes(requestedLimit) ? requestedLimit : 20;
-    const sort = req.query.sort === "useful" ? "useful" : "new";
+    const sort = parseSort(req.query.sort);
 
     const { rows: productRows } = await pool.query<{ goods_no: string }>(
       "SELECT goods_no FROM products WHERE id = $1",
@@ -30,26 +38,36 @@ workRouter.get(
       return;
     }
 
-    const [primary, otherRankMap, flaggedRows] = await Promise.all([
-      sort === "new"
-        ? fetchLatestPhotoReviews(product.goods_no, limit)
-        : fetchUsefulPhotoReviews(product.goods_no, limit),
-      sort === "new"
-        ? fetchUsefulRankMap(product.goods_no, limit)
-        : fetchLatestRankMap(product.goods_no, limit),
-      pool.query<{ review_no: string }>(
-        "SELECT review_no FROM review_flags WHERE product_id = $1",
-        [id]
-      ),
-    ]);
+    const flagsQuery = pool.query<{ review_no: string }>(
+      "SELECT review_no FROM review_flags WHERE product_id = $1",
+      [id]
+    );
 
+    let primary: TopReview[];
+    let otherRankMap: Map<number, number> | null = null;
+
+    if (sort === "new") {
+      [primary, otherRankMap] = await Promise.all([
+        fetchLatestPhotoReviews(product.goods_no, limit),
+        fetchUsefulRankMap(product.goods_no, limit),
+      ]);
+    } else if (sort === "useful") {
+      [primary, otherRankMap] = await Promise.all([
+        fetchUsefulPhotoReviews(product.goods_no, limit),
+        fetchLatestRankMap(product.goods_no, limit),
+      ]);
+    } else {
+      // 별점 낮은순: 사진 없는 후기도 함께 노출하며, 최신/유용순 대비 순위는 표시하지 않는다.
+      primary = await fetchLowRatedReviews(product.goods_no, limit);
+    }
+
+    const flaggedRows = await flagsQuery;
     const flaggedSet = new Set(flaggedRows.rows.map((r) => Number(r.review_no)));
 
     const list = primary.map((r) => ({
       reviewNo: r.reviewNo,
-      // 현재 정렬 기준(sort)의 순위는 목록 위치(r.rank)이고, 반대 기준의 순위는 매핑에서 조회한다.
-      latestRank: sort === "new" ? r.rank : otherRankMap.get(r.reviewNo) ?? null,
-      usefulRank: sort === "new" ? otherRankMap.get(r.reviewNo) ?? null : r.rank,
+      latestRank: sort === "new" ? r.rank : sort === "useful" ? otherRankMap?.get(r.reviewNo) ?? null : null,
+      usefulRank: sort === "useful" ? r.rank : sort === "new" ? otherRankMap?.get(r.reviewNo) ?? null : null,
       sort,
       nickname: r.nickname,
       grade: r.grade,

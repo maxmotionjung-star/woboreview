@@ -45,18 +45,19 @@ interface MusinsaReviewListResponse {
   };
 }
 
-type MusinsaSort = "up_cnt_desc" | "new";
+type MusinsaSort = "up_cnt_desc" | "new" | "goods_est_asc";
 
 async function fetchReviewPage(
   goodsNo: string,
   sort: MusinsaSort,
   page: number,
-  pageSize: number
+  pageSize: number,
+  hasPhoto: boolean
 ): Promise<Omit<TopReview, "rank">[]> {
   const url =
     `https://goods.musinsa.com/api2/review/v1/view/list` +
     `?page=${page}&pageSize=${pageSize}&goodsNo=${encodeURIComponent(goodsNo)}` +
-    `&sort=${sort}&myFilter=false&hasPhoto=true&isExperience=false`;
+    `&sort=${sort}&myFilter=false&hasPhoto=${hasPhoto}&isExperience=false`;
 
   const res = await fetch(url, {
     headers: {
@@ -95,13 +96,14 @@ async function fetchReviewPage(
 async function fetchReviewsUpTo(
   goodsNo: string,
   sort: MusinsaSort,
-  limit: number
+  limit: number,
+  hasPhoto = true
 ): Promise<TopReview[]> {
   const results: Omit<TopReview, "rank">[] = [];
   let page = 0;
   while (results.length < limit) {
     const pageSize = Math.min(MAX_PAGE_SIZE, limit - results.length);
-    const items = await fetchReviewPage(goodsNo, sort, page, pageSize);
+    const items = await fetchReviewPage(goodsNo, sort, page, pageSize, hasPhoto);
     results.push(...items);
     if (items.length < pageSize) break; // 더 이상 리뷰가 없음
     page += 1;
@@ -144,4 +146,12 @@ export async function fetchLatestRankMap(
 ): Promise<Map<number, number>> {
   const reviews = await fetchReviewsUpTo(goodsNo, "new", limit);
   return new Map(reviews.map((r) => [r.reviewNo, r.rank]));
+}
+
+/**
+ * "낮은 평점순" 정렬 기준 리뷰 N개를 가져온다 (WORK 화면용).
+ * 이 정렬에서는 사진이 없는 후기도 함께 노출해야 하므로 hasPhoto 필터를 걸지 않는다.
+ */
+export async function fetchLowRatedReviews(goodsNo: string, limit: number): Promise<TopReview[]> {
+  return fetchReviewsUpTo(goodsNo, "goods_est_asc", limit, false);
 }
