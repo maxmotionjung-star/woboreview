@@ -24,7 +24,14 @@
 
   <main>
     <p class="muted mb-4">최근 30일 TOP10 구성원 변동 이력 (신규 진입 / 이탈)</p>
+    <div class="control-group">
+      <span class="control-label">상품</span>
+      <select id="productFilter" class="input-apple">
+        <option value="">전체 보기</option>
+      </select>
+    </div>
     <div id="content">불러오는 중...</div>
+    <div id="historyPagination" class="pagination"></div>
   </main>
 
   <script src="/common.js"></script>
@@ -39,17 +46,33 @@
     }
 
     let historyReviewMap = {};
+    let allHistoryChanges = [];
+    let historyPage = 1;
+    const HISTORY_PAGE_SIZE = 10;
 
-    async function loadHistory() {
+    async function loadProductFilterOptions() {
+      const products = await api("/api/products");
+      const select = document.getElementById("productFilter");
+      const options = products
+        .map((p) => `<option value="${p.id}">${p.name ?? "상품 " + p.goods_no}</option>`)
+        .join("");
+      select.innerHTML = `<option value="">전체 보기</option>${options}`;
+    }
+
+    function renderHistoryPage() {
       const content = document.getElementById("content");
-      const changes = await api("/api/changes?days=30");
-      if (changes.length === 0) {
+      const pageBox = document.getElementById("historyPagination");
+      if (allHistoryChanges.length === 0) {
         content.innerHTML = `<div class="muted">최근 30일간 변동 이력이 없습니다.</div>`;
+        pageBox.innerHTML = "";
         return;
       }
 
+      const start = (historyPage - 1) * HISTORY_PAGE_SIZE;
+      const pageItems = allHistoryChanges.slice(start, start + HISTORY_PAGE_SIZE);
+
       historyReviewMap = {};
-      const rows = changes.map((c) => {
+      const rows = pageItems.map((c) => {
         historyReviewMap[c.id] = c.image_urls || [];
         const thumb = c.image_urls && c.image_urls[0]
           ? `<button type="button" class="row-thumb-btn" data-change-id="${c.id}"><img src="${c.image_urls[0]}" alt="리뷰 이미지" loading="lazy" /></button>`
@@ -58,11 +81,12 @@
         return `
         <tr>
           <td>${thumb}</td>
-          <td>${formatDate(c.detected_at)}</td>
+          <td>${formatDateNoSeconds(c.detected_at)}</td>
           <td>${c.product_name ?? "상품 " + c.goods_no}</td>
           <td><span class="badge-pill ${badgeClass}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
           <td>${rankSummary(c)}</td>
           <td>${c.nickname ?? "익명"}</td>
+          <td>${formatDateOnly(c.review_posted_at)}</td>
           <td>${gradeStars(c.grade)}</td>
           <td><a class="link-apple" href="${c.review_url}" target="_blank" rel="noopener">${likeChangeText(c)}</a></td>
         </tr>`;
@@ -72,7 +96,7 @@
         <div class="table-wrap">
         <table class="table-apple">
           <thead>
-            <tr><th>사진</th><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>별점</th><th>도움돼요</th></tr>
+            <tr><th>사진</th><th>변동시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>등록일</th><th>별점</th><th>도움돼요</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
@@ -83,9 +107,29 @@
           openLightbox(historyReviewMap[btn.dataset.changeId] || [], 0);
         });
       });
+
+      renderPagination(pageBox, allHistoryChanges.length, HISTORY_PAGE_SIZE, historyPage, (p) => {
+        historyPage = p;
+        renderHistoryPage();
+      });
     }
 
-    requireAuthOrRedirect().then(loadHistory);
+    async function loadHistory() {
+      const content = document.getElementById("content");
+      content.innerHTML = "불러오는 중...";
+      const productId = document.getElementById("productFilter").value;
+      const query = productId ? `/api/changes?days=30&productId=${productId}` : "/api/changes?days=30";
+      allHistoryChanges = await api(query);
+      historyPage = 1;
+      renderHistoryPage();
+    }
+
+    document.getElementById("productFilter").addEventListener("change", loadHistory);
+
+    requireAuthOrRedirect().then(async () => {
+      await loadProductFilterOptions();
+      loadHistory();
+    });
   </script>
 </body>
 </html>

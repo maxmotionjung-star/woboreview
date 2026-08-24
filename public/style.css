@@ -437,9 +437,37 @@ main {
   font-weight: 600;
   letter-spacing: -0.12px;
   color: white;
+  white-space: nowrap;
 }
 .badge-entered { background: #34c759; }
 .badge-dropped { background: #ff3b30; }
+
+/* ---- 페이지네이션 ---- */
+.pagination {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+.page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-divider-soft);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.page-btn.active {
+  border: 2px solid var(--color-primary-focus);
+  font-weight: 600;
+}
 
 /* ---- 표 ---- */
 .table-wrap {

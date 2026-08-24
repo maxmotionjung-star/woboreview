@@ -46,6 +46,35 @@ function formatDateOnly(iso) {
   return d.toLocaleDateString("ko-KR");
 }
 
+function formatDateNoSeconds(iso) {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  return d.toLocaleString("ko-KR", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function renderPagination(container, totalItems, pageSize, currentPage, onPageChange) {
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  if (totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+  const buttons = [];
+  for (let p = 1; p <= totalPages; p++) {
+    buttons.push(`<button type="button" class="page-btn ${p === currentPage ? "active" : ""}" data-page="${p}">${p}</button>`);
+  }
+  container.innerHTML = buttons.join("");
+  container.querySelectorAll("[data-page]").forEach((btn) => {
+    btn.addEventListener("click", () => onPageChange(Number(btn.dataset.page)));
+  });
+}
+
 function likeChangeText(change) {
   const at = change.like_count_at_event;
   const now = change.like_count_now;

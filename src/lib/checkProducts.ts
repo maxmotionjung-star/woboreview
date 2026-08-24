@@ -106,7 +106,7 @@ async function saveRankChanges(
 
   const values: unknown[] = [];
   const placeholders = events.map((e, i) => {
-    const base = i * 11;
+    const base = i * 12;
     values.push(
       productId,
       e.reviewNo,
@@ -118,14 +118,15 @@ async function saveRankChanges(
       e.imageUrl,
       e.imageUrls,
       e.likeCount,
+      e.postedAt,
       detectedAt
     );
-    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11})`;
+    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11}, $${base + 12})`;
   });
 
   await pool.query(
     `INSERT INTO rank_changes
-       (product_id, review_no, change_type, old_rank, new_rank, nickname, grade, image_url, image_urls, like_count, detected_at)
+       (product_id, review_no, change_type, old_rank, new_rank, nickname, grade, image_url, image_urls, like_count, review_posted_at, detected_at)
      VALUES ${placeholders.join(", ")}`,
     values
   );

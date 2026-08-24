@@ -9,6 +9,15 @@ changesRouter.get(
   asyncHandler(async (req, res) => {
     const requestedDays = Number(req.query.days);
     const days = Number.isFinite(requestedDays) && requestedDays > 0 ? Math.min(requestedDays, 30) : 30;
+    const requestedProductId = Number(req.query.productId);
+    const productId = Number.isFinite(requestedProductId) && requestedProductId > 0 ? requestedProductId : null;
+
+    const params: unknown[] = [days];
+    let productFilter = "";
+    if (productId !== null) {
+      params.push(productId);
+      productFilter = `AND rc.product_id = $${params.length}`;
+    }
 
     const { rows } = await pool.query(
       `SELECT rc.id, rc.product_id, p.name AS product_name, p.goods_no,
@@ -16,6 +25,7 @@ changesRouter.get(
               rc.nickname, rc.grade, rc.like_count AS like_count_at_event,
               rs.like_count AS like_count_now,
               COALESCE(rc.image_urls, rs.image_urls) AS image_urls,
+              COALESCE(rc.review_posted_at, rs.review_posted_at) AS review_posted_at,
               'https://www.musinsa.com/review/' || rc.review_no AS review_url,
               rc.detected_at
        FROM rank_changes rc
@@ -25,9 +35,10 @@ changesRouter.get(
         AND rs.review_no = rc.review_no
         AND rs.captured_at = (SELECT MAX(captured_at) FROM review_snapshots WHERE product_id = rc.product_id)
        WHERE rc.detected_at >= now() - ($1 || ' days')::interval
+       ${productFilter}
        ORDER BY rc.detected_at DESC
        LIMIT 500`,
-      [days]
+      params
     );
     res.json(rows);
   })

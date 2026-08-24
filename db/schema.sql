@@ -51,12 +51,14 @@ CREATE TABLE IF NOT EXISTS rank_changes (
   image_url TEXT,
   image_urls TEXT[],
   like_count INTEGER,
+  review_posted_at TIMESTAMPTZ,
   detected_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- 기존 DB에도 안전하게 적용되도록 별도 ALTER (컬럼이 이미 있으면 무시됨)
 ALTER TABLE rank_changes ADD COLUMN IF NOT EXISTS like_count INTEGER;
 ALTER TABLE rank_changes ADD COLUMN IF NOT EXISTS image_urls TEXT[];
+ALTER TABLE rank_changes ADD COLUMN IF NOT EXISTS review_posted_at TIMESTAMPTZ;
 
 CREATE INDEX IF NOT EXISTS idx_rank_changes_product_detected
   ON rank_changes (product_id, detected_at DESC);

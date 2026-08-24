@@ -34,6 +34,7 @@
       </div>
     </div>
     <div id="recentChanges">불러오는 중...</div>
+    <div id="recentChangesPagination" class="pagination"></div>
 
     <div class="section-heading">
       <span class="muted">사진후기만 · 유용한순 정렬 기준 TOP10</span>
@@ -149,17 +150,24 @@
     }
 
     let changesReviewMap = {};
+    let allRecentChanges = [];
+    let recentChangesPage = 1;
+    const RECENT_CHANGES_PAGE_SIZE = 5;
 
-    async function loadRecentChanges(days) {
+    function renderRecentChangesPage() {
       const box = document.getElementById("recentChanges");
-      box.innerHTML = "불러오는 중...";
-      const changes = await api(`/api/changes?days=${days}`);
-      if (changes.length === 0) {
+      const pageBox = document.getElementById("recentChangesPagination");
+      if (allRecentChanges.length === 0) {
         box.innerHTML = `<div class="muted">선택한 기간 동안 변동 이력이 없습니다.</div>`;
+        pageBox.innerHTML = "";
         return;
       }
+
+      const start = (recentChangesPage - 1) * RECENT_CHANGES_PAGE_SIZE;
+      const pageItems = allRecentChanges.slice(start, start + RECENT_CHANGES_PAGE_SIZE);
+
       changesReviewMap = {};
-      const rows = changes.map((c) => {
+      const rows = pageItems.map((c) => {
         changesReviewMap[c.id] = c.image_urls || [];
         const thumb = c.image_urls && c.image_urls[0]
           ? `<button type="button" class="row-thumb-btn" data-change-id="${c.id}"><img src="${c.image_urls[0]}" alt="리뷰 이미지" loading="lazy" /></button>`
@@ -168,18 +176,19 @@
         return `
         <tr>
           <td>${thumb}</td>
-          <td>${formatDate(c.detected_at)}</td>
+          <td>${formatDateNoSeconds(c.detected_at)}</td>
           <td>${c.product_name ?? "상품 " + c.goods_no}</td>
           <td><span class="badge-pill ${badgeClass}">${c.change_type === "entered" ? "진입" : "이탈"}</span></td>
           <td>${rankSummary(c)}</td>
           <td>${c.nickname ?? "익명"}</td>
+          <td>${formatDateOnly(c.review_posted_at)}</td>
           <td><a class="link-apple" href="${c.review_url}" target="_blank" rel="noopener">${likeChangeText(c)}</a></td>
         </tr>`;
       }).join("");
       box.innerHTML = `
         <div class="table-wrap">
         <table class="table-apple">
-          <thead><tr><th>사진</th><th>시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>도움돼요</th></tr></thead>
+          <thead><tr><th>사진</th><th>변동시각</th><th>상품</th><th>구분</th><th>순위 변동</th><th>작성자</th><th>등록일</th><th>도움돼요</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
         </div>`;
@@ -189,6 +198,19 @@
           openLightbox(changesReviewMap[btn.dataset.changeId] || [], 0);
         });
       });
+
+      renderPagination(pageBox, allRecentChanges.length, RECENT_CHANGES_PAGE_SIZE, recentChangesPage, (p) => {
+        recentChangesPage = p;
+        renderRecentChangesPage();
+      });
+    }
+
+    async function loadRecentChanges(days) {
+      const box = document.getElementById("recentChanges");
+      box.innerHTML = "불러오는 중...";
+      allRecentChanges = await api(`/api/changes?days=${days}`);
+      recentChangesPage = 1;
+      renderRecentChangesPage();
     }
 
     document.getElementById("rangeToggle").addEventListener("click", (e) => {
