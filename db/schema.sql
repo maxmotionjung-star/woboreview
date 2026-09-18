@@ -64,10 +64,22 @@ CREATE INDEX IF NOT EXISTS idx_rank_changes_product_detected
   ON rank_changes (product_id, detected_at DESC);
 
 -- WORK 화면에서 "도움돼요 눌러야 할 리뷰"로 표시(빨간 테두리)한 기록. 기기 간 공유를 위해 DB에 저장.
+-- "전체 보기"는 상품관리에 등록되지 않은(무신사 브랜드 페이지에서 실시간으로만 조회되는) 상품도
+-- 포함하므로, product_id가 아니라 goods_no를 기준으로 저장한다.
 CREATE TABLE IF NOT EXISTS review_flags (
   id SERIAL PRIMARY KEY,
-  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  goods_no TEXT,
   review_no BIGINT NOT NULL,
-  flagged_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE (product_id, review_no)
+  flagged_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- 기존 DB에도 안전하게 적용되도록 별도 마이그레이션 (이미 적용되어 있으면 무시됨)
+ALTER TABLE review_flags ALTER COLUMN product_id DROP NOT NULL;
+ALTER TABLE review_flags ADD COLUMN IF NOT EXISTS goods_no TEXT;
+UPDATE review_flags rf SET goods_no = p.goods_no
+  FROM products p WHERE rf.product_id = p.id AND rf.goods_no IS NULL;
+DELETE FROM review_flags WHERE goods_no IS NULL;
+ALTER TABLE review_flags ALTER COLUMN goods_no SET NOT NULL;
+ALTER TABLE review_flags DROP CONSTRAINT IF EXISTS review_flags_product_id_review_no_key;
+CREATE UNIQUE INDEX IF NOT EXISTS review_flags_goods_no_review_no_key ON review_flags (goods_no, review_no);

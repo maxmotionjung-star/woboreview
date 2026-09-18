@@ -47,6 +47,12 @@ interface MusinsaReviewListResponse {
 
 type MusinsaSort = "up_cnt_desc" | "new" | "goods_est_asc";
 
+// 무신사(Cloudflare)가 429(Error 1015, 레이트리밋)를 반환하면 응답의 Retry-After 헤더가 끝날 때까지
+// (실측 108초) 이 IP의 모든 요청이 계속 차단된다. 매 요청마다 재시도로 다시 두드리면 차단이 더
+// 길어질 뿐이므로, 최초 429를 만나면 그 시각을 기록해두고 이후 요청은 즉시 실패시켜(회로 차단)
+// "전체 보기"처럼 수백 개 상품을 순회할 때 남은 상품들을 빠르게 건너뛰도록 한다.
+let blockedUntil = 0;
+
 async function fetchReviewPage(
   goodsNo: string,
   sort: MusinsaSort,
@@ -54,6 +60,10 @@ async function fetchReviewPage(
   pageSize: number,
   hasPhoto: boolean
 ): Promise<Omit<TopReview, "rank">[]> {
+  if (Date.now() < blockedUntil) {
+    throw new Error("무신사 리뷰 API가 일시적으로 요청을 제한하고 있어 건너뜁니다.");
+  }
+
   const url =
     `https://goods.musinsa.com/api2/review/v1/view/list` +
     `?page=${page}&pageSize=${pageSize}&goodsNo=${encodeURIComponent(goodsNo)}` +
@@ -67,6 +77,13 @@ async function fetchReviewPage(
       Referer: `https://www.musinsa.com/products/${goodsNo}`,
     },
   });
+
+  if (res.status === 429) {
+    const retryAfterSec = Number(res.headers.get("retry-after"));
+    const waitMs = Number.isFinite(retryAfterSec) && retryAfterSec > 0 ? retryAfterSec * 1000 : 60000;
+    blockedUntil = Date.now() + waitMs;
+    throw new Error(`무신사 리뷰 API 요청 제한(429) — ${Math.round(waitMs / 1000)}초간 추가 요청을 건너뜁니다.`);
+  }
 
   if (!res.ok) {
     throw new Error(`무신사 리뷰 API 응답 오류: ${res.status} ${res.statusText}`);
@@ -154,4 +171,65 @@ export async function fetchLatestRankMap(
  */
 export async function fetchLowRatedReviews(goodsNo: string, limit: number): Promise<TopReview[]> {
   return fetchReviewsUpTo(goodsNo, "goods_est_asc", limit, false);
+}
+
+export interface BrandGoodsItem {
+  goodsNo: string;
+  name: string;
+  thumbnailUrl: string | null;
+}
+
+interface MusinsaPlpGoodsResponse {
+  data?: {
+    list?: Array<{
+      goodsNo: number;
+      goodsName: string;
+      thumbnail?: string;
+    }>;
+    pagination?: {
+      hasNext: boolean;
+      nextPageUrl: string;
+    };
+  };
+}
+
+const BRAND_PLP_BASE = "https://api.musinsa.com/api2/dp/v2/plp/goods";
+const BRAND_PLP_PAGE_SIZE = 100; // 무신사 API 제약: 첫 페이지는 size 100까지 인증 없이 허용됨
+
+/**
+ * 무신사 브랜드 페이지(예: 워크온바디오프)에 등록된 전체 상품 목록을 가져온다.
+ * 상품관리에 별도 등록하지 않아도 무신사에 새 상품이 올라오면 다음 조회 때 그대로 포함된다.
+ * 첫 페이지 응답이 알려주는 nextPageUrl(서명된 hmacId 포함)을 그대로 따라가며 페이지네이션한다 —
+ * 직접 hmacId를 계산할 수 없으므로 이 방식이 아니면 두 번째 페이지부터 403이 발생한다.
+ */
+export async function fetchBrandGoodsList(brand: string, gf: string): Promise<BrandGoodsItem[]> {
+  const headers = {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+    Accept: "application/json, text/plain, */*",
+    Referer: `https://www.musinsa.com/brand/${brand}/products?gf=${gf}`,
+  };
+
+  let url: string | null =
+    `${BRAND_PLP_BASE}?gf=${encodeURIComponent(gf)}&sortCode=POPULAR&brand=${encodeURIComponent(brand)}` +
+    `&page=1&size=${BRAND_PLP_PAGE_SIZE}&caller=FLAGSHIP`;
+  const items: BrandGoodsItem[] = [];
+
+  while (url) {
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      throw new Error(`무신사 브랜드 상품 목록 API 응답 오류: ${res.status} ${res.statusText}`);
+    }
+    const body = (await res.json()) as MusinsaPlpGoodsResponse;
+    for (const item of body.data?.list ?? []) {
+      items.push({
+        goodsNo: String(item.goodsNo),
+        name: item.goodsName,
+        thumbnailUrl: item.thumbnail ?? null,
+      });
+    }
+    url = body.data?.pagination?.hasNext ? body.data.pagination.nextPageUrl ?? null : null;
+  }
+
+  return items;
 }
